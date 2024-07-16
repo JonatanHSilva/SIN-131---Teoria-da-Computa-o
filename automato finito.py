@@ -8,7 +8,7 @@ def entradaDados():
     for i in estados:
         for j in alfabeto:
             transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"?\n'.format(i, j)))])
-            print(transicoes)
+            #print(transicoes)
     estadoInicial = str(input(f'Dentre {estados}, qual estado seria o inicial? '))
     estadoFinal = str(input(f'Dentre os estados {estados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')
     print('Automato Salvo!!!')
@@ -31,6 +31,14 @@ def simulacao(parametrosEstados):
         for k in parametrosEstados[4]:
             if k[0] == estadoAtual and i == k[1]:
                 estadoAtual = k[2]
+                #print(k)
+                #print(estadoAtual)
                 break
+
+    if estadoAtual == parametrosEstados[2][0]:
+        print('Palavra Aceita!!!')
+    else:
+        print('Palavra Rejeitada!!!')
+
 
 simulacao(entradaDados())
