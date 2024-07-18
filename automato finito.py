@@ -35,10 +35,12 @@ def simulacao(parametrosEstados):
                 #print(estadoAtual)
                 break
 
+
     if estadoAtual == parametrosEstados[2][0]:
         print('Palavra Aceita!!!')
     else:
         print('Palavra Rejeitada!!!')
 
+while True:
+    simulacao(entradaDados())
 
-simulacao(entradaDados())
