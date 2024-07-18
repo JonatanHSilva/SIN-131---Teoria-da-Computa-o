@@ -41,6 +41,6 @@ def simulacao(parametrosEstados):
     else:
         print('Palavra Rejeitada!!!')
 
-while True:
-    simulacao(entradaDados())
+
+simulacao(entradaDados())
 
