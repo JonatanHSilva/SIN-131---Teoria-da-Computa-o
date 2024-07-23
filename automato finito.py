@@ -2,7 +2,10 @@ import pynput
 
 #Entrada de dados do Automato
 def entradaDados():
-    estados = str(input('Digite quais estados possui o automato:\n')).split(', ')
+    estados = int(input('Digite quantos estados possui o automato:\n'))
+    for i in range (estados):
+        estadosGerados += "q{i}"
+    estadosGerados = estadosGerados.split()
     alfabeto = str(input('Digite o alfabeto:\n')).split(', ')
     transicoes = []
     for i in estados:
