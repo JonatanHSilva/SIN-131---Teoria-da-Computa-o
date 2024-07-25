@@ -59,22 +59,39 @@ def simulacaoAFD(parametrosEstados):
 
 def conversao(parametrosEstados):
     contagem = 0
+    primeiroLoop = False
     transicoesConversao = []
 
     for alfabeto in parametrosEstados[1]:
         for l in parametrosEstados[4]:
-            print(l)
             if contagem == 0:
                 transicoesConversao.append(l)
                 contagem += 1
             else:
+                concatenou = False
                 for i in transicoesConversao:
-                    if i[0] == l[0] and i[1] == alfabeto and alfabeto == l[1]:
+                    if i[0] == l[0] and i[1] == alfabeto and i[1] == l[1] and i[2] != l[2]:
                         i[2] = i[2] + ', ' + l[2]
-                    else:
-                        i.append(l)
-                        
-            print(transicoesConversao)
+                        concatenou = True
+                if not concatenou and not primeiroLoop:
+                    transicoesConversao.append(l)                   
+            #print(transicoesConversao)
+        
+        primeiroLoop = True
+
+    conversaoTemporario = transicoesConversao
+    j = 0
+    k = 0
+    
+    print(len(conversaoTemporario))
+    while k < len(conversaoTemporario):
+        while j < len(transicoesConversao):
+            if conversaoTemporario[k][0] != transicoesConversao[j][0] and conversaoTemporario[k][1] == transicoesConversao [j][1]:
+                transicoesConversao.append([conversaoTemporario[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], conversaoTemporario[k][2] + ', ' + transicoesConversao[j][2]])
+                #print(transicoesConversao)
+        k = k + 1   
+       
+        
         
 
     
