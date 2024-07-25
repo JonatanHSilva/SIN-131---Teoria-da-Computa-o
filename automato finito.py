@@ -79,19 +79,38 @@ def conversao(parametrosEstados):
         
         primeiroLoop = True
 
-    conversaoTemporario = transicoesConversao
-    j = 0
+    conversaoTemporario = len(transicoesConversao)
     k = 0
     
-    print(len(conversaoTemporario))
-    while k < len(conversaoTemporario):
-        while j < len(transicoesConversao):
-            if conversaoTemporario[k][0] != transicoesConversao[j][0] and conversaoTemporario[k][1] == transicoesConversao [j][1]:
-                transicoesConversao.append([conversaoTemporario[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], conversaoTemporario[k][2] + ', ' + transicoesConversao[j][2]])
-                #print(transicoesConversao)
-        k = k + 1   
-       
-        
+    while k < conversaoTemporario:
+        j = k + 1
+        while j < conversaoTemporario:
+            if transicoesConversao[k][1] == transicoesConversao[j][1] and transicoesConversao[k][0] not in transicoesConversao[j][0]:
+                if transicoesConversao[k][2] in transicoesConversao[j][2]:
+                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2]])
+                else:
+                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2] + ', ' + transicoesConversao[j][2]])
+            j += 1       
+        k += 1
+
+    k = 0
+    indiceTemporario = conversaoTemporario
+    j = indiceTemporario
+    conversaoTemporario = len(transicoesConversao)
+    while k < conversaoTemporario:
+        while j < conversaoTemporario:
+            if transicoesConversao[k][1] == transicoesConversao[j][1] and transicoesConversao[k][0] not in transicoesConversao[j][0]:
+                if transicoesConversao[k][2] in transicoesConversao[j][2]:
+                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2]])
+                    indiceTemporario = j
+                    break
+                else:
+                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2] + ', ' + transicoesConversao[j][2]])
+                    indiceTemporario = j
+                    break
+            j += 1    
+        k += 1
+    #print(transicoesConversao)
         
 
     
