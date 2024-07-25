@@ -30,11 +30,11 @@ print("insira as funções de transição:\t ('n' para vazio) ", end= "")
 
 for estado in estados:
     for simbolo in alfabeto:
-        print(f"\t {simbolo}")
+        print(f"\n\t {simbolo}")
         print(f"{estado}\t--->\t", end="")
         proximoEstado = input()
 
-        if proximoEstado == "n":
+        if proximoEstado == " ":
             transicao[(estado, simbolo)] = None
         else:
             transicao[(estado, simbolo)] = proximoEstado
