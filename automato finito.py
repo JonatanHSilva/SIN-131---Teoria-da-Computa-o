@@ -92,29 +92,96 @@ def conversao(parametrosEstados):
                     transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2] + ', ' + transicoesConversao[j][2]])
             j += 1       
         k += 1
-
     k = 0
     indiceTemporario = conversaoTemporario
-    j = indiceTemporario
+    atualizarIndice = conversaoTemporario
     conversaoTemporario = len(transicoesConversao)
-    while k < conversaoTemporario:
+    while k < indiceTemporario:
+        j = atualizarIndice
         while j < conversaoTemporario:
             if transicoesConversao[k][1] == transicoesConversao[j][1] and transicoesConversao[k][0] not in transicoesConversao[j][0]:
                 if transicoesConversao[k][2] in transicoesConversao[j][2]:
                     transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2]])
-                    indiceTemporario = j
-                    break
+                    atualizarIndice = j
                 else:
                     transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2] + ', ' + transicoesConversao[j][2]])
-                    indiceTemporario = j
-                    break
-            j += 1    
+                    atualizarIndice = j
+            j += 1
         k += 1
-    #print(transicoesConversao)
+    print(transicoesConversao.sort())
         
 
-    
-            
+estados = int(input('Digite quantos estados possui o automato:\n'))
+for i in range (estados):
+    if i == 0:
+        estadosGerados = "q{}".format(i)
+    else:
+        estadosGerados += ",q{}".format(i)
+estadosGerados = estadosGerados.split(',')
 
-conversao(entradaDados())
+transicoesConversao = estadosGerados.copy()
+indiceTemporario = 0
+i = 0
+while i < len(estadosGerados):
+    k = i
+    while k < len(estadosGerados):
+        if estadosGerados[i] not in transicoesConversao[k]:
+            transicoesConversao.append(estadosGerados[i] + ', ' + transicoesConversao[k])
+        k += 1
+        #
+    i += 1
+    #print(estadosGerados)
+#print(transicoesConversao)
+atualizarIndice = len(estadosGerados)
+vezes = (2 ** len(estadosGerados)) - 1
+print(vezes)
+i = 0
+mudou = i
+contador = len(estadosGerados) - 1
+j = 0
+while j < vezes:
+    while i < len(estadosGerados):
+        k = atualizarIndice
+        while k < (len(transicoesConversao)):
+            if estadosGerados[i] in transicoesConversao[k]:
+                if i + 1 != len(estadosGerados):
+                    i += 1
+                    k -= 1
+                    indice = i
+                    #print('entrou')
+                '''else:
+                    if k + 1 < len(transicoesConversao):
+                        if estadosGerados[i - 1] or estadosGerados[i] not in transicoesConversao[k + 1]:
+                            i -= 1
+                            #print("mudou indice")'''
+            else:
+                transicoesConversao.append(transicoesConversao[k] + ', ' + estadosGerados[i])
+                if i + 1 != len(estadosGerados):
+                    i += 1
+                    k -= 1
+                else:
+                    i = indice
+                
+            k += 1
+                
+            #print(mudou)
+            print(k)
+            print(estadosGerados[i])
+            print(transicoesConversao)
+            print(indice)
+        
+        atualizarIndice += contador
+        contador -= 1
+        
+        if(contador > 2):
+            contador = 2
+            mudou = 2
+        #print(atualizarIndice)
+        mudou += 1
+        i = mudou
+        #
+    j += 1
+    
+    
+    #print(estadosGerados)
 
