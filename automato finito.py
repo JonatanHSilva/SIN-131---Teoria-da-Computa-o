@@ -1,4 +1,4 @@
-import pynput
+#import pynput
 
 #Entrada de dados do Automato
 def entradaDados():
@@ -22,7 +22,7 @@ def entradaDados():
             estadoInicial = str(input(f'Dentre {estadosGerados}, qual estado seria o inicial? '))
             estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')
             print('Automato Salvo!!!')
-            return estadoInicial, alfabeto, estadoFinal, estados, transicoes
+            return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados
         except ValueError:
             print('Entrada inválida, digite apenas números.\n')
     
@@ -57,131 +57,109 @@ def simulacaoAFD(parametrosEstados):
         print('Palavra Rejeitada!!!')
 
 
-def conversao(parametrosEstados):
-    contagem = 0
-    primeiroLoop = False
-    transicoesConversao = []
+'''def conversao(parametrosEstados, transicoesConversao, estadosGerados):
+    atualizarIndice = 0
+    vezes = (2 ** len(estadosGerados)) - 1
+    #print(vezes)
+    i = 0
+    k = 0
+    j = 0
+
+    while i < vezes:
+        teste = transicoesConversao[atualizarIndice].split(', ')
+        print(teste)
+        ultimoIndiceTeste = len(teste) - 1
+        j = 0
+        indiceEstado = 0
+        while j < len(estadosGerados):
+            if estadosGerados[j] == teste[ultimoIndiceTeste]:
+                indiceEstado = j
+            #print(estadosGerados[j]) 
+            j += 1
+            #print(teste[ultimoIndiceTeste])
+            #print(ultimo)
+            #print(achou)
+        k = indiceEstado + 1
+        while k < len(estadosGerados):
+            transicoesConversao.append(transicoesConversao[atualizarIndice] + ', ' + estadosGerados[k])
+            k += 1
+            #print(achou)
+        i += 1
+        
+        if atualizarIndice != len(transicoesConversao) - 1:
+            atualizarIndice += 1
+        #print(transicoesConversao)
+        #print(atualizarIndice)'''
+    
+def conversaoAFN(parametrosEstados):
+    transicoesExistentes = parametrosEstados[3].copy()
+    transicoesConvertidas = []
+    estadosGerados = parametrosEstados[3].copy()
+    
+    atualizarIndice = 0
+    vezes = (2 ** len(estadosGerados)) - 1
+    i = 0
+    k = 0
+    j = 0
+
+    while i < vezes:
+        teste = transicoesExistentes[atualizarIndice].split(', ')
+        #print(teste)
+        ultimoIndiceTeste = len(teste) - 1
+        j = 0
+        indiceEstado = 0
+        while j < len(estadosGerados):
+            if estadosGerados[j] == teste[ultimoIndiceTeste]:
+                indiceEstado = j
+            j += 1
+        k = indiceEstado + 1
+        while k < len(estadosGerados):
+            transicoesExistentes.append(transicoesExistentes[atualizarIndice] + ', ' + estadosGerados[k])
+            k += 1
+        i += 1
+        
+        if atualizarIndice != len(transicoesExistentes) - 1:
+            atualizarIndice += 1
 
     for alfabeto in parametrosEstados[1]:
-        for l in parametrosEstados[4]:
-            if contagem == 0:
-                transicoesConversao.append(l)
-                contagem += 1
-            else:
-                concatenou = False
-                for i in transicoesConversao:
-                    if i[0] == l[0] and i[1] == alfabeto and i[1] == l[1] and i[2] != l[2]:
-                        i[2] = i[2] + ', ' + l[2]
-                        concatenou = True
-                if not concatenou and not primeiroLoop:
-                    transicoesConversao.append(l)                   
-            #print(transicoesConversao)
-        
-        primeiroLoop = True
-
-    conversaoTemporario = len(transicoesConversao)
-    k = 0
-    
-    while k < conversaoTemporario:
-        j = k + 1
-        while j < conversaoTemporario:
-            if transicoesConversao[k][1] == transicoesConversao[j][1] and transicoesConversao[k][0] not in transicoesConversao[j][0]:
-                if transicoesConversao[k][2] in transicoesConversao[j][2]:
-                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2]])
-                else:
-                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2] + ', ' + transicoesConversao[j][2]])
-            j += 1       
-        k += 1
-    k = 0
-    indiceTemporario = conversaoTemporario
-    atualizarIndice = conversaoTemporario
-    conversaoTemporario = len(transicoesConversao)
-    while k < indiceTemporario:
-        j = atualizarIndice
-        while j < conversaoTemporario:
-            if transicoesConversao[k][1] == transicoesConversao[j][1] and transicoesConversao[k][0] not in transicoesConversao[j][0]:
-                if transicoesConversao[k][2] in transicoesConversao[j][2]:
-                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2]])
-                    atualizarIndice = j
-                else:
-                    transicoesConversao.append([transicoesConversao[k][0] + ', ' + transicoesConversao[j][0], transicoesConversao[j][1], transicoesConversao[k][2] + ', ' + transicoesConversao[j][2]])
-                    atualizarIndice = j
-            j += 1
-        k += 1
-    print(transicoesConversao.sort())
+        i = 0
+        while i < len(transicoesExistentes):
+            conversoesInicial = []
+            conversoesFinal = []
+            teste = transicoesExistentes[i].split(', ')
+            #print(teste)
+            j = 0
+            while j < len(teste):
+                contagem = 0
+                for transicoes in parametrosEstados[4]:
+                    if teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem == 0:
+                        conversoesInicial.append(transicoes[0])
+                        conversoesFinal.append(transicoes[2])
+                        contagem += 1
+                    elif teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem != 0:
+                        if teste[j] not in transicoes[0]:
+                            conversoesInicial[0] = conversoesInicial[0] + ', ' + transicoes[0]
+                            if transicoes[2] not in conversoesFinal:
+                                conversoesFinal[0] = conversoesFinal[0] + ', ' + transicoes[2]
+                            else:
+                                conversoesFinal[0] = transicoes[2]
+                        else:
+                            conversoesInicial[0] = transicoes[0]
+                            if transicoes[2] not in conversoesFinal:
+                                conversoesFinal[0] = conversoesFinal[0] + ', ' + transicoes[2]
+                            else:
+                                conversoesFinal[0] = transicoes[2]
+                finalNaoDupla = set(conversoesFinal)
+                conversoesFinal = list(finalNaoDupla)  
+                j += 1
+            #print(conversoesFinal)   
+            i += 1
+            transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal])
+    #print(transicoesConvertidas)
         
 
-estados = int(input('Digite quantos estados possui o automato:\n'))
-for i in range (estados):
-    if i == 0:
-        estadosGerados = "q{}".format(i)
-    else:
-        estadosGerados += ",q{}".format(i)
-estadosGerados = estadosGerados.split(',')
 
-transicoesConversao = estadosGerados.copy()
-indiceTemporario = 0
-i = 0
-while i < len(estadosGerados):
-    k = i
-    while k < len(estadosGerados):
-        if estadosGerados[i] not in transicoesConversao[k]:
-            transicoesConversao.append(estadosGerados[i] + ', ' + transicoesConversao[k])
-        k += 1
-        #
-    i += 1
-    #print(estadosGerados)
-#print(transicoesConversao)
-atualizarIndice = len(estadosGerados)
-vezes = (2 ** len(estadosGerados)) - 1
-print(vezes)
-i = 0
-mudou = i
-contador = len(estadosGerados) - 1
-j = 0
-while j < vezes:
-    while i < len(estadosGerados):
-        k = atualizarIndice
-        while k < (len(transicoesConversao)):
-            if estadosGerados[i] in transicoesConversao[k]:
-                if i + 1 != len(estadosGerados):
-                    i += 1
-                    k -= 1
-                    indice = i
-                    #print('entrou')
-                '''else:
-                    if k + 1 < len(transicoesConversao):
-                        if estadosGerados[i - 1] or estadosGerados[i] not in transicoesConversao[k + 1]:
-                            i -= 1
-                            #print("mudou indice")'''
-            else:
-                transicoesConversao.append(transicoesConversao[k] + ', ' + estadosGerados[i])
-                if i + 1 != len(estadosGerados):
-                    i += 1
-                    k -= 1
-                else:
-                    i = indice
-                
-            k += 1
-                
-            #print(mudou)
-            print(k)
-            print(estadosGerados[i])
-            print(transicoesConversao)
-            print(indice)
-        
-        atualizarIndice += contador
-        contador -= 1
-        
-        if(contador > 2):
-            contador = 2
-            mudou = 2
-        #print(atualizarIndice)
-        mudou += 1
-        i = mudou
-        #
-    j += 1
-    
-    
-    #print(estadosGerados)
+conversaoAFN(entradaDados())
+
+
 
