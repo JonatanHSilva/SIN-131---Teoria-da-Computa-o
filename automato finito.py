@@ -124,40 +124,183 @@ def conversaoAFN(parametrosEstados):
     for alfabeto in parametrosEstados[1]:
         i = 0
         while i < len(transicoesExistentes):
-            conversoesInicial = []
-            conversoesFinal = []
+            conversoesInicial = ''
+            conversoesFinal = ''
             teste = transicoesExistentes[i].split(', ')
-            #print(teste)
             j = 0
+            contagem = 0
             while j < len(teste):
-                contagem = 0
                 for transicoes in parametrosEstados[4]:
                     if teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem == 0:
-                        conversoesInicial.append(transicoes[0])
-                        conversoesFinal.append(transicoes[2])
+                        conversoesInicial = transicoes[0]
+                        conversoesFinal = transicoes[2]
                         contagem += 1
                     elif teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem != 0:
-                        if teste[j] not in transicoes[0]:
-                            conversoesInicial[0] = conversoesInicial[0] + ', ' + transicoes[0]
+                        
+                        if teste[j] not in conversoesInicial:
+                            conversoesInicial = conversoesInicial + ', ' + transicoes[0]
+                            #print('inicial:' + conversoesInicial)
+
                             if transicoes[2] not in conversoesFinal:
-                                conversoesFinal[0] = conversoesFinal[0] + ', ' + transicoes[2]
+                                conversoesFinal = conversoesFinal + ', ' + transicoes[2]
                             else:
-                                conversoesFinal[0] = transicoes[2]
+                                conversoesFinal = transicoes[2]
                         else:
-                            conversoesInicial[0] = transicoes[0]
+                            conversoesInicial = transicoes[0]
                             if transicoes[2] not in conversoesFinal:
-                                conversoesFinal[0] = conversoesFinal[0] + ', ' + transicoes[2]
+                                conversoesFinal = conversoesFinal + ', ' + transicoes[2]
                             else:
-                                conversoesFinal[0] = transicoes[2]
-                finalNaoDupla = set(conversoesFinal)
-                conversoesFinal = list(finalNaoDupla)  
+                                conversoesFinal = transicoes[2]
                 j += 1
-            #print(conversoesFinal)   
             i += 1
             transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal])
     #print(transicoesConvertidas)
-        
 
+    transicoesCopia = transicoesConvertidas.copy()
+    transicoesModTempo = []
+    transicoesModificados = []
+
+    for alfabeto in parametrosEstados[1]:
+        for i in transicoesCopia:
+            if i[1] == alfabeto and i[0] == parametrosEstados[0]:
+                transicoesModTempo.append(i)
+            #print(i)
+            for j in transicoesConvertidas:
+                if i[2] == j[0] and i[1] == alfabeto and j[1] == alfabeto:
+                    transicoesModTempo.append(j)
+    #print(transicoesModTempo)
+    
+    for alfabeto in parametrosEstados[1]:
+        indice = 0
+        for temporario in transicoesModTempo:
+            if indice == 0 and temporario[1] == alfabeto:
+                transicoesModificados.append(temporario)
+                #print(transicoesModificados)
+                indice += 1
+            i = 0
+            adicionou = False
+            while i < len(transicoesModificados):
+                if temporario[0] not in transicoesModificados[i][0] and transicoesModificados[i][1] == alfabeto and temporario[1] == alfabeto:
+                    adicionou = True
+                elif temporario[0] in transicoesModificados[i][0] and transicoesModificados[i][1] == alfabeto and temporario[1] == alfabeto:
+                    adicionou = False
+                #print(temporario[0])
+                #print(transicoesModificados[i])
+                #print(i)
+                i += 1
+                
+            if adicionou:
+                transicoesModificados.append(temporario)
+    #print(transicoesModificados)
+    
+    estadosFinaisModificados = []
+    i = 0
+    while i < len(transicoesModificados):
+        for finais in parametrosEstados[2]:
+            if finais in transicoesModificados[i][0]:
+                estadosFinaisModificados.append(transicoesModificados[i][2])
+            #print(transicoesModificados[i])
+        i += 1
+
+    i = 0 
+
+    estadoModificados = []
+    
+    while i < len(transicoesModificados):
+        estadoModificados.append(transicoesModificados[i][0])
+        i += 1
+    estadosSemRepeticao = set(estadoModificados)
+    estadoModificados = list(estadosSemRepeticao)
+    #print(estadosSemRepeticao)
+    
+
+    minimizacao(parametrosEstados, transicoesModificados, estadoModificados, estadosFinaisModificados)
+        
+    #print(transicoesModificados)
+    #print(indices)
+    #return transicoesModificados, indices        
+                
+def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, estadoFinalModificado):
+    transicoesT = transicoesModificados.copy()
+    transicoesMinInicial = []
+    transicoesMinFinal = []
+    transicoesEliminar = transicoesT
+    j = 0
+    i = 0
+    #print(transicoesT)
+    while j < len(transicoesT):
+        i = j + 1
+        while i < len(transicoesT):
+            for final in estadoFinalModificado:
+                if final in transicoesT[i][0] and final in transicoesT[j][0] or final not in transicoesT[i][0] and final not in transicoesT[j][0]:
+                    if final in transicoesT[i][2] and final in transicoesT[j][2] or final not in transicoesT[i][2] and final not in transicoesT[j][2]:
+                        if transicoesT[i][1] == transicoesT[j][1]:
+                            transicoesMinInicial.append([transicoesT[i][0], transicoesT[j][0]])
+                            transicoesMinFinal.append([transicoesT[i][2], transicoesT[j][2]])
+            i += 1
+        j += 1
+    
+    j = 0
+    i = 0
+    
+    while i < len(transicoesMinInicial):
+        while j < len(transicoesMinFinal):
+            k = 0
+            for l in transicoesMinFinal:
+                while k < len(l):
+                    testeFinal = l[k]
+                    #print(l[0])
+                    k += 1
+                o = 0
+                for m in transicoesMinInicial:
+                    while o < len(m):
+                        testeInicial = m[o]
+                        if testeInicial == testeFinal:
+                            for t in transicoesT:
+                                if t[0] == testeInicial:
+                                    transicoesEliminar.remove(t)
+                        o += 1
+                        
+            j += 1
+        i += 1
+    
+    #print(transicoesMinInicial)
+    #print(transicoesMinFinal)
+    #print(transicoesEliminar)                  
+    
+    estadoNovo = 'F'
+    indiceTransicoes = 0
+    #
+    #transicoesNulas = []
+    #teste = parametrosEstados[1]
+    i = 0
+    achou = 0
+    diferente = 0
+    simbolo = ''
+    while i < len(estadoModificados):
+        for alfabeto in parametrosEstados[1]:
+            for j in transicoesModificados:
+                if estadoModificados[i] == j[0] and alfabeto == j[1]:
+                    achou += 1
+                    simbolo = alfabeto
+        #print('estado: '+estadoModificados[i])
+        #print('simbolo: '+ simbolo)
+        if achou < len(parametrosEstados[1]):
+            for alfabeto in parametrosEstados[1]:
+                for j in transicoesModificados:
+                    #print('alfabeto: '+ alfabeto)
+                    #print(j[0])
+                    #print(j[1])
+                    if estadoModificados[i] == j[0] and alfabeto != simbolo and j[1] != alfabeto:
+                        transicoesModificados.append([j[0], alfabeto, estadoNovo])
+                        #print('entrou')
+        
+        i += 1
+        achou = 0
+    #print(transicoesModificados)
+    for alfabeto in parametrosEstados[1]:
+       transicoesModificados.append([estadoNovo, alfabeto, estadoNovo])
+    estadoModificados.append(estadoNovo)
 
 conversaoAFN(entradaDados())
 
