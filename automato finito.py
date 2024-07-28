@@ -259,6 +259,8 @@ def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, est
                             for t in transicoesT:
                                 if t[0] == testeInicial:
                                     transicoesEliminar.remove(t)
+                                if testeFinal == t[2]:
+                                    t[2] = t[0]
                         o += 1
                         
             j += 1
