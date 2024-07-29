@@ -25,46 +25,35 @@ def entradaDados():
             return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados
         except ValueError:
             print('Entrada inválida, digite apenas números.\n')
-    
-    #print(estadosGerados)
    
 
-'''def simulacaoAFN(parametrosEstados):
-    caminhoAceitacao = []
-    for alfabeto in parametrosEstados[1]:
-        contagem = 0
-        for transicoes in parametrosEstados[4]:
-            if transicoes[0] == parametrosEstados[0]:
-                caminhoAceitacao.append(transicoes)
-                contagem += 1
-            elif transicoes[2] '''
+#Simulação de aceitação de palavras
+def simulacao(palavra, estadoAtual, transicoes):
+
+   if(palavra == ''):
+      for aceita in transicoes:
+         if(aceita == estadoAtual):
+            return True
+      return False
+
+   simbolo = palavra[0]
+   for transicao in transicoes:
+      if((transicao[0] == estadoAtual) and (transicao[1] == simbolo)):
+         return simulacao(palavra[1:], transicao[2], transicoes)
+   return False
                 
 
-#Simulação de aceitação de palavras
-def simulacaoAFD(parametrosEstados):
+def aceitacao(parametrosEstados):
     palavra = str(input('Digite a palavra:'))
     estadoAtual = parametrosEstados[0]
-
-    for i in palavra:
-        for j in parametrosEstados[1]:
-            if i == j:
-                break
+    
+    numEstadosIniciais = parametrosEstados[5] - len(parametrosEstados[2])
+    for i in range(0, numEstadosIniciais):
+        if(simulacao(palavra, parametrosEstados[4], i)):
+            print('Palavra Aceita!!!')
         else:
-            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
-
-        
-        for k in parametrosEstados[4]:
-            if k[0] == estadoAtual and i == k[1]:
-                estadoAtual = k[2]
-                #print(k)
-                #print(estadoAtual)
-                break
-
-
-    if estadoAtual == parametrosEstados[2][0]:
-        print('Palavra Aceita!!!')
-    else:
-        print('Palavra Rejeitada!!!')
+            print('Palavra Rejeitada!!!')
+   
 
     
 def conversaoAFN(parametrosEstados):
@@ -96,7 +85,8 @@ def conversaoAFN(parametrosEstados):
         
         if atualizarIndice != len(estadosGerados) - 1:
             atualizarIndice += 1
-    #print(transicoesExistentes)
+    
+
     conjEstIniciais = []
     conjEstFinais = []
     for alfabeto in parametrosEstados[1]:
@@ -185,15 +175,9 @@ def conversaoAFN(parametrosEstados):
         i += 1
     estadosSemRepeticao = set(conjEstIniciais)
     conjEstIniciais = list(estadosSemRepeticao)
-    #print(conjEstIniciais)
-    #print(estadosSemRepeticao)
     
 
-    minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais)
-        
-    #print(transicoesModificados)
-    #print(indices)
-    #return transicoesModificados, indices        
+    minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais)    
                 
 def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, estadoFinalModificado):
     transicoesT = transicoesModificados.copy()
@@ -203,9 +187,6 @@ def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, est
     transicoesCopia = transicoesT.copy()
     j = 0
     i = 0
-    #print(transicoesT)
-    #print(estadoFinalModificado)
-    #print(transicoesCopia)
     
 
     while j < len(transicoesT):
@@ -249,35 +230,32 @@ def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, est
                                         transicoesEliminar.remove(t)
                                         
                         o += 1
-                        
             j += 1
         i += 1
-    
-    #print(transicoesMinInicial)
-   # print(transicoesMinFinal)
-    #print(transicoesEliminar)
-
-    
-
-    #
-    
-    
-    #print(transicoesEliminar)
-    
-    #
-    #transicoesNulas = []
-    #teste = parametrosEstados[1]
-    
-                        #print('entrou')
-        
-      
-    
-    #for alfabeto in parametrosEstados[1]:
-       #transicoesEliminar.append([estadoNovo, alfabeto, estadoNovo])
-    #print(transicoesEliminar)
     
 
 conversaoAFN(entradaDados())
 
 
+'''def simulacaoAFD(parametrosEstados):
+    
 
+    for i in palavra:
+        for j in parametrosEstados[1]:
+            if i == j:
+                break
+        else:
+            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
+
+        
+        for k in parametrosEstados[4]:
+            if k[0] == estadoAtual and i == k[1]:
+                estadoAtual = k[2]
+                #print(k)
+                #print(estadoAtual)
+                break
+
+
+    if estadoAtual == parametrosEstados[2][0]:
+        
+    else:'''
