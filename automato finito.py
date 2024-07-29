@@ -43,18 +43,39 @@ def simulacao(palavra, estadoAtual, transicoes):
    return False
                 
 
-def aceitacao(parametrosEstados):
+'''def aceitacao(parametrosEstados):
     palavra = str(input('Digite a palavra:'))
     estadoAtual = parametrosEstados[0]
     
-    numEstadosIniciais = parametrosEstados[5] - len(parametrosEstados[2])
-    for i in range(0, numEstadosIniciais):
-        if(simulacao(palavra, parametrosEstados[4], i)):
+    for i in parametrosEstados[3]:
+        if(simulacao(palavra, i, parametrosEstados[4])):
             print('Palavra Aceita!!!')
         else:
-            print('Palavra Rejeitada!!!')
+            print('Palavra Rejeitada!!!')'''
    
+def simulacaoAFD(parametrosEstados):
+    palavra = str(input('Digite a palavra:'))
+    estadoAtual = parametrosEstados[0]
+    for i in palavra:
+        for j in parametrosEstados[1]:
+            if i == j:
+                break
+        else:
+            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
 
+        
+        for k in parametrosEstados[4]:
+            if k[0] == estadoAtual and i == k[1]:
+                estadoAtual = k[2]
+                #print(k)
+                #print(estadoAtual)
+                break
+
+
+    if estadoAtual == parametrosEstados[2][0]:
+        print('Palavra Aceita!!!')
+    else:
+        print('Palavra Rejeitada!!!')
     
 def conversaoAFN(parametrosEstados):
     estadosGerados = parametrosEstados[3].copy()
@@ -232,30 +253,11 @@ def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, est
                         o += 1
             j += 1
         i += 1
+        aceitacao()
     
-
-conversaoAFN(entradaDados())
-
-
-'''def simulacaoAFD(parametrosEstados):
-    
-
-    for i in palavra:
-        for j in parametrosEstados[1]:
-            if i == j:
-                break
-        else:
-            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
-
-        
-        for k in parametrosEstados[4]:
-            if k[0] == estadoAtual and i == k[1]:
-                estadoAtual = k[2]
-                #print(k)
-                #print(estadoAtual)
-                break
+parametros = entradaDados()
+simulacaoAFD(parametros)
+#conversaoAFN(parametros)
 
 
-    if estadoAtual == parametrosEstados[2][0]:
-        
-    else:'''
+''''''
