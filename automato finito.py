@@ -28,31 +28,93 @@ def entradaDados():
    
 
 #Simulação de aceitação de palavras
-def simulacao(palavra, estadoAtual, transicoes):
-
-   if(palavra == ''):
-      for aceita in transicoes:
-         if(aceita == estadoAtual):
-            return True
-      return False
-
-   simbolo = palavra[0]
-   for transicao in transicoes:
-      if((transicao[0] == estadoAtual) and (transicao[1] == simbolo)):
-         return simulacao(palavra[1:], transicao[2], transicoes)
-   return False
-                
-
-'''def aceitacao(parametrosEstados):
+def simulacao(parametrosEstados):
     palavra = str(input('Digite a palavra:'))
     estadoAtual = parametrosEstados[0]
-    
-    for i in parametrosEstados[3]:
-        if(simulacao(palavra, i, parametrosEstados[4])):
-            print('Palavra Aceita!!!')
-        else:
-            print('Palavra Rejeitada!!!')'''
+    estadoTemporario = []
+    estadoTeste = []
    
+    sinal = False
+    for i in palavra:
+        for j in parametrosEstados[1]:
+            if i == j:
+                break
+        else:
+            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
+        tamanho = 0
+        while tamanho < len(estadoTemporario):
+            estadoTemporario[tamanho][3] = False
+            tamanho += 1
+        ocorrencia = False
+        proximaPalavra = False
+        ambiguidades = 0
+        entrou = False
+        contagem = 0
+        entrada = 0
+        for k in parametrosEstados[4]:
+            for ambiguidade in parametrosEstados[6]:
+                if not ocorrencia:
+                    if k[0] == ambiguidade[0] and i == ambiguidade[1] and i == k[1]:
+                        ambiguidades = ambiguidade[2]
+            if k[0] == estadoAtual and i == k[1]:
+                if not ocorrencia and ambiguidades == 0:
+                    estadoAtual = k[2]
+                    ocorrencia = True
+                elif ambiguidades >= 1:
+                    if len(estadoTemporario) < ambiguidades + 1:
+                        if contagem  < ambiguidades + 1:
+                            estadoTemporario.append([k[0], k[3], k[2], True])
+                            contagem += 1
+                    else:
+                        if estadoTemporario[len(estadoTemporario) - 1][0] != k[0]:
+                            if contagem < ambiguidades + 1:
+                                estadoTemporario.append([k[0], k[3], k[2], True]) 
+                                print(contagem)
+                                contagem += 1
+                    sinal = True
+                    
+                
+            
+            if sinal and not entrou:
+                if len(estadoTemporario) < 2:
+                    if k[0] == estadoTemporario[0][2] and i == k[1] and not estadoTemporario[0][3]:
+                        if k[0] != estadoTemporario[0][0]:
+                            estadoTemporario[0][2] = k[2]
+                        else:
+                            if estadoTemporario[0][1] == k[3]:
+                                estadoTemporario[0][2] = k[2]
+                        entrou = True
+                else:
+                    h = 0
+                    while h < len(estadoTemporario): 
+                        if k[0] == estadoTemporario[h][2] and i == k[1] and not estadoTemporario[h][3]:
+                            if k[0] != estadoTemporario[h][0]:
+                                estadoTemporario[h][2] = k[2]
+                                entrada += 1
+                            else:
+                                if ambiguidades > 0:
+                                    if estadoTemporario[h][1] == k[3]:
+                                        estadoTemporario[h][2] = k[2]
+                                        entrada += 1
+                                else:
+                                    estadoTemporario[h][2] = k[2]
+                                    entrada += 1
+                        h += 1
+                    if entrada == len(estadoTemporario):
+                        entrou = True
+    h = 0   
+    while h < len(estadoTemporario):
+        for finais in parametrosEstados[2]:
+            if estadoTemporario[h][2] == finais and estadoAtual != finais:
+                estadoAtual = estadoTemporario[h][2]
+        h += 1
+                   
+    if estadoAtual in parametrosEstados[2]:
+        print('Palavra Aceita!!!')
+    else:
+        print('Palavra Rejeitada!!!')
+                
+
 def simulacaoAFD(parametrosEstados):
     palavra = str(input('Digite a palavra:'))
     estadoAtual = parametrosEstados[0]
@@ -90,7 +152,6 @@ def conversaoAFN(parametrosEstados):
 
     while i < vezes:
         teste = estadosGerados[atualizarIndice].split(', ')
-        #print(teste)
         ultimoIndiceTeste = len(teste) - 1
         j = 0
         indiceEstado = 0
@@ -128,8 +189,6 @@ def conversaoAFN(parametrosEstados):
                         
                         if teste[j] not in conversoesInicial:
                             conversoesInicial = conversoesInicial + ', ' + transicoes[0]
-                            #print('inicial:' + conversoesInicial)
-
                             if transicoes[2] not in conversoesFinal:
                                 conversoesFinal = conversoesFinal + ', ' + transicoes[2]
                             else:
@@ -143,7 +202,6 @@ def conversaoAFN(parametrosEstados):
                 j += 1
             i += 1
             transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal])
-    #print(transicoesConvertidas)
     
     for estados in estadosGerados:
         for alfabeto in parametrosEstados[1]:
@@ -153,14 +211,12 @@ def conversaoAFN(parametrosEstados):
     conjEstFinais.append(parametrosEstados[0])
     copia = set(conjEstFinais)
     conjEstFinais = list(copia)
-    #print(conjEstFinais)
 
     conjTransicoes = []
     for finais in conjEstFinais:
         for transicoes in transicoesConvertidas:
             if finais == transicoes[0]:
                 conjTransicoes.append(transicoes)
-    #print(conjTransicoes)
     
     estadoNovo = 'F'
     transicoesPont = conjTransicoes
@@ -256,7 +312,8 @@ def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, est
         aceitacao()
     
 parametros = entradaDados()
-simulacaoAFD(parametros)
+while True:
+    simulacao(parametros)
 #conversaoAFN(parametros)
 
 
