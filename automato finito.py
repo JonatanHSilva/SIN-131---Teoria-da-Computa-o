@@ -13,16 +13,18 @@ def entradaDados():
             estadosGerados = estadosGerados.split(',')
             alfabeto = str(input('Digite o alfabeto:\n')).split(', ')
             transicoes = []
+            ambiguidade = []
             for i in estadosGerados:
                 for j in alfabeto:
                     qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"?\n'))
                     for m in range(qtdTransicoes):
                         transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"?\n'.format(i, j)))])
+                    ambiguidade.append([i, j, qtdTransicoes - 1])
                     #print(transicoes)
             estadoInicial = str(input(f'Dentre {estadosGerados}, qual estado seria o inicial? '))
             estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')
             print('Automato Salvo!!!')
-            return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados
+            return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade
         except ValueError:
             print('Entrada inválida, digite apenas números.\n')
    
@@ -256,7 +258,7 @@ def conversaoAFN(parametrosEstados):
 
     minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais)    
                 
-def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, estadoFinalModificado):
+'''def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, estadoFinalModificado):
     transicoesT = transicoesModificados.copy()
     transicoesMinInicial = []
     transicoesMinFinal = []
@@ -309,12 +311,130 @@ def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, est
                         o += 1
             j += 1
         i += 1
-        aceitacao()
+        aceitacao()'''
+
+def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais):
+    estadosIniciais = conjEstIniciais
+    estadosFinais = conjEstFinais
+    pares = []
+    transicoesCopia = conjTransicoes
     
+    resultante = []
+    indices = []
+    
+    
+    indice = 0
+    for iniciais in estadosIniciais:
+        for estados in estadosIniciais:
+            if estados != iniciais:
+                indice += 1
+                pares.append(iniciais, estados, False, indice)
+
+    indice = 0
+    for finais in estadosFinais:
+        for estados in estadosFinais:
+            if estados != finais:
+                indice += 1
+                pares.append(finais, estados, False, indice)
+
+    resultado = ''
+    for par in pares:
+        for alfabeto in alfabeto:
+            for transicoes in conjTransicoes:
+                if transicoes[0] == par[0] and transicoes[1] == alfabeto:
+                    if resultado == '':
+                        resultado = transicoes[2]
+                    else:
+                        resultado = resultado + ', ' + transicoes[2]
+                elif transicoes[0] == par[1] and transicoes[1] == alfabeto:
+                    if resultado == '':
+                        resultado = transicoes[2]
+                    else:
+                        resultado = resultado + ', ' + transicoes[2]
+        resultante.append(resultado, False, par[3])
+
+    contagem = 0
+    for inicial in resultante:
+        teste = inicial[0].split(', ')
+        for par in pares:
+            if (par[0] == teste[0] and par[1] == teste[1]) or (par[0] == teste[1] and par[1] == teste[0]):
+                contagem += 1
+
+        if contagem != inicial[2]:
+            indices.append(inicial[2])
+    
+    for i in indices:
+        for resultado in resultante:
+            if i == resultado[2]:
+                resultado[1] = True
+
+
+    for inicial in resultante:
+        teste = inicial[0].split(', ')
+        for par in pares:
+            if inicial[1]:
+                if par[3] == inicial[2]:
+                    par[2] = True
+                   
+    pares = minimizacaoRecursao(0, pares, conjTransicoes, parametrosEstados[1])
+
+    for i in pares:
+        for alfabeto in alfabeto:
+            for transicoes in transicoesCopia:
+                if not i[2]:
+                    if transicoes[0] == i[0] and alfabeto == transicoes[1]:
+                        for t in parametrosEstados:
+                            if t[0] == i[1] and alfabeto == t[1]:
+                                transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]])
+                                transicoesCopia.remove(t)
+                                transicoesCopia.remove(transicoes)
+    
+    
+
+
+def minimizacaoRecursao(index, peer, transitions, simbolos):
+    indice = index
+    pares = peer
+    transicoes = transitions
+    resultado = ''
+    achou = False
+
+    for alfabeto in simbolos:
+        for transicoes in transicoes:
+            if transicoes[0] == pares[indice][0] and transicoes[1] == alfabeto:
+                if resultado == '':
+                    resultado = transicoes[2]
+                else:
+                    resultado = resultado + ', ' + transicoes[2]
+            elif transicoes[0] == pares[indice][1] and transicoes[1] == alfabeto:
+                if resultado == '':
+                    resultado = transicoes[2]
+                else:
+                    resultado = resultado + ', ' + transicoes[2]
+
+    resultante = resultado.split(', ')
+
+    for par in pares:
+        if (resultante[0] == par[0] and resultante[1] == par[1]) or (resultante[0] == par[1] and resultante[1] == par[0]):
+            achou = True
+            indice = par[3]
+    
+    if achou and indice != 0:
+        pares[indice][2] = minimizacaoRecursao(indice, pares, transicoes, simbolos)
+        return pares[indice][2]
+    elif achou and indice == 0:
+        pares[indice][2] = minimizacaoRecursao(indice, pares, transicoes, simbolos)
+        return pares
+    elif not achou:
+        return True
+        
+
+    
+
 parametros = entradaDados()
 while True:
     simulacao(parametros)
 #conversaoAFN(parametros)
 
 
-''''''
+
