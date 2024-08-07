@@ -17,8 +17,10 @@ def entradaDados():
             for i in estadosGerados:
                 for j in alfabeto:
                     qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"?\n'))
+                    ocorrencia = 0
                     for m in range(qtdTransicoes):
-                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"?\n'.format(i, j)))])
+                        ocorrencia += 1
+                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"?\n'.format(i, j))), ocorrencia])
                     ambiguidade.append([i, j, qtdTransicoes - 1])
                     #print(transicoes)
             estadoInicial = str(input(f'Dentre {estadosGerados}, qual estado seria o inicial? '))
@@ -272,7 +274,7 @@ def conversaoAFN(parametrosEstados):
     #print(conjEstIniciais)
     
 
-    minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais)    
+    return minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais)    
                 
 '''def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, estadoFinalModificado):
     transicoesT = transicoesModificados.copy()
@@ -335,7 +337,6 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
     pares = []
     transicoesCopia = conjTransicoes
     
-    resultante = []
     indices = []
     
     
@@ -360,47 +361,11 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
             j += 1
         i += 1
 
+                   
+    pares = minimizacaoRecursao(0, -1, pares, conjTransicoes, parametrosEstados[1], 0)
+
     #print(pares)
 
-    resultado = []
-    for par in pares:
-        for alfabeto in parametrosEstados[1]:
-            for transicoes in conjTransicoes:
-                for t in conjTransicoes:
-                    if transicoes[0] == par[0] and t[0] == par[1] and transicoes[1] == alfabeto and t[1] == alfabeto:
-                        resultado.append([transicoes[2], t[2]])
-                        break
-        resultante.append([resultado, False, par[3]])
-    #print(resultante)
-
-    '''contagem = 0
-    for inicial in resultante:
-        teste = inicial[0]
-        for par in pares:
-            if (par[0] == teste[0] and par[1] == teste[1]) or (par[0] == teste[1] and par[1] == teste[0]):
-                contagem += 1
-
-        if contagem != inicial[2]:
-            indices.append(inicial[2])
-    
-    for i in indices:
-        for resultado in resultante:
-            if i == resultado[2]:
-                resultado[1] = True
-
-
-    for inicial in resultante:
-        teste = inicial[0]
-        for par in pares:
-            if inicial[1]:
-                if par[3] == inicial[2]:
-                    par[2] = True'''
-
-    
-                   
-    pares = minimizacaoRecursao(0, pares, conjTransicoes, parametrosEstados[1], 0)
-
-    print(pares)
     if type(pares) != bool:
         for i in pares:
             for alfabeto in parametrosEstados[1]:
@@ -410,27 +375,99 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
                             #print(transicoes[0] + ', ' + i[0])
                             for t in transicoesCopia:
                                 if t[0] == i[1] and alfabeto == t[1]:
-                                    #print(t[0] + ', ' + i[1])
-                                    #print(alfabeto)
-                                    if i[0] not in i[1] or i[1] not in i[0]:
-                                        #print(i[0] + ', ' + i[1])
-                                        transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]])
-                                        transicoesCopia.remove(t)
-                                        transicoesCopia.remove(transicoes)
-                                    else:
-                                        transicoesCopia.append([i[1], alfabeto, t[2]])
-                                        transicoesCopia.remove(t)
-                                        transicoesCopia.remove(transicoes)
-                                    
+                                    transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]])
+                                    transicoesCopia.remove(t)
+                                    transicoesCopia.remove(transicoes)
 
-    print(transicoesCopia)
     
+    for transicoes in transicoesCopia:
+        entradaSRepeticao = ''
+        saidaSRepeticao = ''
+        entrada = transicoes[0].split(', ')
+        saida = transicoes[2].split(', ')
+        i = 0
+        while i < len(entrada):
+            j = i + 1
+            while j < len(entrada):
+                if entrada[i] == entrada[j] and i != 0:
+                    entrada.remove(entrada[j])
+                elif entrada[i] == entrada[j] and i == 0:
+                    entrada.remove(entrada[i])
+                j += 1
+            i += 1
+        
+        i = 0
+        while i < len(entrada):
+            if entradaSRepeticao == '':
+                entradaSRepeticao = entrada[i]
+            else:
+                entradaSRepeticao = entradaSRepeticao + ', ' + entrada[i]
+            i += 1
+        #print(entradaSRepeticao)
+        transicoes[0] = entradaSRepeticao
+
+        i = 0
+        while i < len(saida):
+            j = i + 1
+            while j < len(saida):
+                if saida[i] == saida[j]:
+                    saida.remove(saida[j])
+                j += 1
+            i += 1
+        
+        i = 0
+        while i < len(saida):
+            if saidaSRepeticao == '':
+                saidaSRepeticao = saida[i]
+            else:
+                saidaSRepeticao = saidaSRepeticao + ', ' + saida[i]
+            i += 1
+        
+        transicoes[2] = saidaSRepeticao
+    
+
+    for alfabeto in parametrosEstados[1]:
+        for transicoes in transicoesCopia:
+            achou = False
+            for t in transicoesCopia:
+                if transicoes[2] == t[0]:
+                    achou = True
+            
+            if not achou:
+                transicoes[2] = transicoes[0]
+
+    
+    estadoFinal = ''
+    for transicoes in transicoesCopia:
+        for finais in parametrosEstados[2]:
+            if finais in transicoes[0]:
+                estadoFinal = transicoes[0]
+    
+    estadosGerados = []
+    for alfabeto in parametrosEstados[1]:
+        for transicoes in transicoesCopia:
+            if alfabeto == transicoes[1]:
+                estadosGerados.append(transicoes[0])
+    estadosCopia = set(estadosGerados)
+    estadosGerados = list(estadosCopia)
+
+    ambiguidade = []
+    for estados in estadosGerados:
+        for alfabeto in parametrosEstados[1]:
+            ambiguidade.append([estados, alfabeto, 0])
+    
+    #print(estadosGerados)
+    #print(estadoFinal)
+    #print(transicoesCopia)
+    
+    return parametrosEstados[0], parametrosEstados[1], estadoFinal, estadosGerados, transicoesCopia, len(estadosGerados), ambiguidade
     
 
 
-def minimizacaoRecursao(index, peer, transitions, simbolos, contagem):
+def minimizacaoRecursao(index, prevIndex, peer, transitions, simbolos, contagem):
     indice = index
     pares = peer
+    indiceAnterior = prevIndex
     transicoes = transitions
     resultado = []
     achou = False
@@ -453,20 +490,21 @@ def minimizacaoRecursao(index, peer, transitions, simbolos, contagem):
                 #print(par)
                 #print(r)
                 achou = True
+                indiceAnterior = indice
                 indice = par[3] - 1
                 #print(indice)
                 break
     #print(indice)
     #print(achou)
-    if achou and contagem < len(resultado) and contagem != 0:
-        pares[indice][2] = minimizacaoRecursao(indice, pares, transicoes, simbolos, contagem + 1)
-        return pares[indice][2]
-    elif achou and contagem == len(resultado):
-        return True
-    elif achou and contagem == 0:
+    if achou and contagem == 0:
         #print('entrou')
-        pares[indice][2] = minimizacaoRecursao(indice, pares, transicoes, simbolos, contagem + 1)
+        pares[indice][2] = minimizacaoRecursao(indice, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
         return pares
+    elif achou and (contagem < len(resultado) and contagem != 0) or indice != indiceAnterior:
+        pares[indice][2] = minimizacaoRecursao(indice, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
+        return pares[indice][2]
+    elif achou and contagem == len(resultado) or indice == indiceAnterior:
+        return True
     elif not achou:
         return True
         
@@ -474,9 +512,10 @@ def minimizacaoRecursao(index, peer, transitions, simbolos, contagem):
     
 
 parametros = entradaDados()
+parametrosMinimizados = conversaoAFN(parametros)
 #while True:
-    #simulacao(parametros)
-conversaoAFN(parametros)
+simulacao(parametros)
+simulacao(parametrosMinimizados)
 
 
 
