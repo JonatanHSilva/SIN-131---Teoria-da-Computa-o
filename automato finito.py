@@ -1,4 +1,5 @@
 #import pynput
+import re
 
 #Entrada de dados do Automato
 def entradaDados():
@@ -142,7 +143,37 @@ def simulacaoAFD(parametrosEstados):
         print('Palavra Aceita!!!')
     else:
         print('Palavra Rejeitada!!!')
+
+def num_sort(test_string):
+    return list(map(int, re.findall(r'\d+', test_string)))
+
+def ordenado(string):
+    teste = string.split(', ')
+    teste.sort(key=num_sort)
+    concatenacao = ''
+    i = 0
+    while i < len(teste):
+        if concatenacao == '':
+            concatenacao = teste[i]
+        else:
+            concatenacao = concatenacao + ', ' + teste[i]
+        i += 1
     
+    return concatenacao
+
+def conversao(conjTransicoes, transicoesConvertidas, alfabeto, ultimoAdicionado):
+    ultimoAlternativo = ordenado(ultimoAdicionado)
+    print(ultimoAlternativo)
+
+    for transicoes in transicoesConvertidas:
+        if ultimoAlternativo == transicoes[0]:
+            transicoes[2] = ordenado(transicoes[2])
+            conjTransicoes.append(transicoes)
+            if ultimoAlternativo != transicoes[2]:
+                conversao(conjTransicoes, transicoesConvertidas, alfabeto, transicoes[2])
+    
+    return conjTransicoes
+
 def conversaoAFN(parametrosEstados):
     estadosGerados = parametrosEstados[3].copy()
     transicoesConvertidas = []
@@ -207,7 +238,8 @@ def conversaoAFN(parametrosEstados):
                 j += 1
             i += 1
             transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal])
-    
+    #print(transicoesConvertidas)
+
     for estados in estadosGerados:
         for alfabeto in parametrosEstados[1]:
             for transicoes in transicoesConvertidas:
@@ -228,13 +260,34 @@ def conversaoAFN(parametrosEstados):
     copia = set(conjEstados)
     conjEstados = list(copia)
 
-
+    print(transicoesConvertidas)
     conjTransicoes = []
-    for estados in conjEstados:
-        for transicoes in transicoesConvertidas:
-            if estados == transicoes[0]:
-                conjTransicoes.append(transicoes)
+    for alfabeto in parametrosEstados[1]:
+        i = 0
+        while i < len(transicoesConvertidas):
+            if parametrosEstados[0] == transicoesConvertidas[i][0] and alfabeto == transicoesConvertidas[i][1]:
+                conjTransicoes.append(transicoesConvertidas[i])
+            i += 1
     
+    
+    indice = len(conjTransicoes)
+    i = 0
+    while i < indice: 
+        conjTransicoes = conversao(conjTransicoes, transicoesConvertidas, parametrosEstados[1], conjTransicoes[i][2])
+        i += 1
+   # print(conjTransicoes)
+
+    i = 0
+    while i < len(conjTransicoes):
+        j = i + 1
+        while j < len(conjTransicoes):
+            if conjTransicoes[i][0] == conjTransicoes[j][0] and conjTransicoes[i][1] == conjTransicoes[j][1]:
+                conjTransicoes.remove(conjTransicoes[j])
+                i -= 1
+            j += 1
+        i += 1
+    #print(conjTransicoes)
+
     estadoNovo = 'F'
     transicoesPont = conjTransicoes
     
@@ -251,7 +304,7 @@ def conversaoAFN(parametrosEstados):
                 resultado = resultado + ', ' + d
             indice += 1
         transicoes[2] = resultado
-    print(conjTransicoes)
+    
     
     novoEstado = False
     for j in conjTransicoes:
@@ -262,7 +315,7 @@ def conversaoAFN(parametrosEstados):
         for alfabeto in parametrosEstados[1]:
             transicoesPont.append([estadoNovo, alfabeto, estadoNovo])
      
-    
+    #print(conjTransicoes)
     i = 0
     while i < len(conjEstados):
         for finais in parametrosEstados[2]:
@@ -360,6 +413,8 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
                 pares.append([estadosFinais[i], estadosFinais[j], False, indice])
             j += 1
         i += 1
+        
+    #print(pares)
 
                    
     pares = minimizacaoRecursao(0, -1, pares, conjTransicoes, parametrosEstados[1], 0)
@@ -377,9 +432,10 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
                                 if t[0] == i[1] and alfabeto == t[1]:
                                     transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]])
                                     transicoesCopia.remove(t)
+                                    #if transicoes != None:
                                     transicoesCopia.remove(transicoes)
 
-    
+    #print(transicoesCopia)
     for transicoes in transicoesCopia:
         entradaSRepeticao = ''
         saidaSRepeticao = ''
@@ -388,13 +444,14 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
         i = 0
         while i < len(entrada):
             j = i + 1
+            removeu = False
             while j < len(entrada):
-                if entrada[i] == entrada[j] and i != 0:
+                if entrada[i] == entrada[j]:
                     entrada.remove(entrada[j])
-                elif entrada[i] == entrada[j] and i == 0:
-                    entrada.remove(entrada[i])
+                    removeu = True
                 j += 1
-            i += 1
+            if not removeu:
+                i += 1
         
         i = 0
         while i < len(entrada):
@@ -406,15 +463,23 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
         #print(entradaSRepeticao)
         transicoes[0] = entradaSRepeticao
 
+        
         i = 0
         while i < len(saida):
+            removeu = False
             j = i + 1
+            #print(saida[i])
             while j < len(saida):
+                
                 if saida[i] == saida[j]:
                     saida.remove(saida[j])
+                    removeu = True
+                #elif saida[i] == saida[j] and i == 0:
+                    #saida.remove(saida[i])
                 j += 1
-            i += 1
-        
+            if not removeu:
+                i += 1
+      
         i = 0
         while i < len(saida):
             if saidaSRepeticao == '':
@@ -422,9 +487,9 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
             else:
                 saidaSRepeticao = saidaSRepeticao + ', ' + saida[i]
             i += 1
-        
+        #print(saidaSRepeticao)
         transicoes[2] = saidaSRepeticao
-    
+    #print(transicoesCopia)
 
     for alfabeto in parametrosEstados[1]:
         for transicoes in transicoesCopia:
@@ -479,35 +544,39 @@ def minimizacaoRecursao(index, prevIndex, peer, transitions, simbolos, contagem)
                     resultado.append([estados[2], t[2]])
                     break
 
-    #print(pares)
     #print(pares[indice])
     #print(resultado)
-    #print(contagem)
+    #print(pares[indice])
 
     for par in pares:
         for r in resultado:
             if (r[0] == par[0] and r[1] == par[1]) or (r[0] == par[1] and r[1] == par[0]):
-                #print(par)
-                #print(r)
                 achou = True
                 indiceAnterior = indice
                 indice = par[3] - 1
                 #print(indice)
                 break
+            #print(par)
+            #print(r)
+  
+    #print(resultado)
+    #print(len(resultado))
+    #print(contagem)
     #print(indice)
     #print(achou)
     if achou and contagem == 0:
-        #print('entrou')
         pares[indice][2] = minimizacaoRecursao(indice, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
         return pares
-    elif achou and (contagem < len(resultado) and contagem != 0) or indice != indiceAnterior:
+    elif achou and contagem < len(resultado) and contagem != 0:
         pares[indice][2] = minimizacaoRecursao(indice, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
         return pares[indice][2]
     elif achou and contagem == len(resultado) or indice == indiceAnterior:
         return True
-    elif not achou:
+    elif not achou and contagem == 0:
+        pares[indice][2] = minimizacaoRecursao(indice + 1, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
+        return pares
+    elif not achou and contagem != 0:
         return True
-        
 
     
 
