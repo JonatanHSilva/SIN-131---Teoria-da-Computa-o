@@ -1,4 +1,3 @@
-#import pynput
 import re
 
 #Entrada de dados do Automato
@@ -286,35 +285,32 @@ def conversaoAFN(parametrosEstados):
     conjEstados.append(parametrosEstados[0])
     copia = set(conjEstados) #variável que "converte" o conjunto de estados do tipo lista para o tipo set, pois o tipo set é um tipo de lista que não admite duplicações, portanto, eliminando quaisquer tipo de duplicações de estados
     conjEstados = list(copia) #convertendo de volta os estados
-    #print(conjEstados)
+    print(conjEstados)
      
     #print(conjTransicoes)
 
     return minimizacao(parametrosEstados, conjTransicoes, conjEstados) #retorno com a chamada da função de minimização que também retornará as transições minimizadas
 
-
+#Minimização do autômato convertido para AFD
 def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
     conjEstIniciais = []
     conjEstFinais = []
     
-    for estados in conjEstados:
-        for alfabeto in parametrosEstados[1]:
-            for transicoes in conjTransicoes:
-                for finais in parametrosEstados[2]: 
-                    if estados == transicoes[2] and transicoes[0] != transicoes[2] and transicoes[1] == alfabeto and finais in estados:
-                        conjEstFinais.append(estados)
-    
-    copia = set(conjEstFinais)
-    conjEstFinais = list(copia)
+    for estados in conjEstados: #loop para verificar quais estados do conjunto de estados é(são) final(is)
+        for finais in parametrosEstados[2]: #loop para passar pelo(s) estado(s) final(is) 
+            if finais in estados: #verifica se o estado atual do conjunto de estados é final
+                conjEstFinais.append(estados) #armazena no conjunto de estados finais
+    copia = set(conjEstFinais) #conversão para retirada de duplicados
+    conjEstFinais = list(copia) #conversão de volta
     #print(conjEstFinais)
     
     i = 0
-    while i < len(conjEstados):
-        final = False
-        for finais in parametrosEstados[2]:
-            if finais in conjEstados[i]:
+    while i < len(conjEstados): #loop para verificar quais estados são não-finais
+        final = False #variável para delimitar o armazenamento de estados não-finais
+        for finais in parametrosEstados[2]: 
+            if finais in conjEstados[i]: #se algum dos estados forem finais, delimita o armazenamento mudando a variável para True
                 final = True
-        if not final:
+        if not final: #verifica se é um estado final, se não, armazena.
             conjEstIniciais.append(conjEstados[i])
         i += 1
     estadosSemRepeticao = set(conjEstIniciais)
@@ -322,51 +318,47 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
     #print(conjEstIniciais)
     
     pares = []
-    transicoesCopia = conjTransicoes
+    transicoesCopia = conjTransicoes #variável que recebe a cópia do conjunto de transições que veio como parametro   
     
-    #indices = []
-    
-    
-    indice = 0
+    indice = 0 #variável que servirá para marcar a posição do par no conjunto de pares que farão a verificação de minimização
     i = 0
-    while i < len(conjEstIniciais):
+    while i < len(conjEstIniciais): #loop para fazer os pares dos estados não-finais
         j = i + 1
-        while j < len(conjEstIniciais):
-            if conjEstIniciais[i] != conjEstIniciais[j]:
-                indice += 1
-                pares.append([conjEstIniciais[i], conjEstIniciais[j], False, indice])
+        while j < len(conjEstIniciais): #loop auxiliar para seja feita pares diferentes
+            if conjEstIniciais[i] != conjEstIniciais[j]: #verifica se os pares são diferentes
+                indice += 1 
+                pares.append([conjEstIniciais[i], conjEstIniciais[j], False, indice]) #adiciona os pares diferentes, com uma "variável" que servirá para caso seja True não haja a fusão dos estados e False para que haja a fusão de estados, além do índice que marca a posição do par
             j += 1
         i += 1
 
     i = 0
-    while i < len(conjEstFinais):
+    while i < len(conjEstFinais): #loop para fazer os pares de estados finais
         j = i + 1
-        while j < len(conjEstFinais):
-            if conjEstFinais[i] != conjEstFinais[j]:
+        while j < len(conjEstFinais): #loop auxiliar para que seja feita para pares finais diferentes
+            if conjEstFinais[i] != conjEstFinais[j]: #verifica se são pares diferentes
                 indice += 1
-                pares.append([conjEstFinais[i], conjEstFinais[j], False, indice])
+                pares.append([conjEstFinais[i], conjEstFinais[j], False, indice]) #adiciona os pares diferentes, com uma variável False que poderá ser modificada caso não seja necessária uma fusão(True) e o índice
             j += 1
         i += 1
         
     #print(pares)
 
-    for par in pares:          
-        pares = minimizar(par[3] - 1, -1, pares, conjTransicoes, parametrosEstados[1], parametrosEstados[2])
+    for par in pares: #loop para que passe por todos os pares e verifique a possibilidade de fusão ou não         
+        pares = minimizar(par[3] - 1, -1, pares, conjTransicoes, parametrosEstados[1], parametrosEstados[2]) #função recursiva que verifica cada par, com o seu respectivo índice, o índice anterior ao atual(inicializado com -1), os pares, as funções de transições convertidas, o alfabeto e os estados finais de antes da conversão
 
     #print(pares)
 
-    for i in pares:
-        for alfabeto in parametrosEstados[1]:
-            for transicoes in transicoesCopia:
-                if not i[2]:
-                    if transicoes[0] == i[0] and alfabeto == transicoes[1]:
+    for i in pares: #loop para verificar quais pares foram "marcados" com False
+        for alfabeto in parametrosEstados[1]: #loop para controle sob quais simbolos farão a alteração
+            for transicoes in transicoesCopia: #loop para controle sob quais transições que farão a alteração
+                if not i[2]: #verifica se o par foi "marcado" com False, assim fazendo a fusão de transições
+                    if transicoes[0] == i[0] and alfabeto == transicoes[1]:  #verifica se um dos pares é compatível com a transição e o simbolo correspondente ao loop de controle
                         #print(transicoes[0] + ', ' + i[0])
-                        for t in transicoesCopia:
-                            if t[0] == i[1] and alfabeto == t[1]:
-                                transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]])
-                                transicoesCopia.remove(t)
-                                #if transicoes != None:
-                                transicoesCopia.remove(transicoes)
+                        for t in transicoesCopia: #loop para verificar o outro par
+                            if t[0] == i[1] and alfabeto == t[1]: #verifica se o outro par é compatível com a transição e o simbolo correspondente ao loop de controle
+                                transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]]) #adiciona a transição com os pares fundidos
+                                transicoesCopia.remove(t) #remove a transição de um dos pares que farão fusão, dando lugar aos pares fundidos
+                                transicoesCopia.remove(transicoes) #remove a transição do outro par
         
 
     #print(transicoesCopia)
