@@ -143,77 +143,77 @@ def ordenado(string):
 
 #Função recursiva para a realização da conversão
 def conversao(conjTransicoes, transicoesConvertidas, alfabeto, ultimoAdicionado):
-    ultimoAlternativo = ordenado(ultimoAdicionado)
+    ultimoAlternativo = ordenado(ultimoAdicionado) #atribuição de conjunto de estados ordenado para o último que foi adicionado na função de transição que está sendo convertida
     #print(ultimoAlternativo)
 
-    for transicoes in transicoesConvertidas:
-        if ultimoAlternativo == transicoes[0]:
-            transicoes[2] = ordenado(transicoes[2])
-            conjTransicoes.append(transicoes)
-            jaAdicionou = False
-            for transicoes1 in conjTransicoes:
+    for transicoes in transicoesConvertidas: #loop para verificar se de todas as transições possíveis, há aquelas que não são transições vazias ou que não levam a uma transição(transições inúteis)
+        if ultimoAlternativo == transicoes[0]: #verifica se o último adicionado nas transições que não são inúteis leva a uma outra transição não inútil
+            transicoes[2] = ordenado(transicoes[2]) #chama a função de ordenação de string para ordenar o estado resultante
+            conjTransicoes.append(transicoes) #adiciona a função de transição não inútil 
+            jaAdicionou = False #variável para controle de transições que já foram (ou não) adicionadas para caso haja transição que leva para o próprio estado
+            for transicoes1 in conjTransicoes: #loop para verificar se já foi adicionado transições que levam para o próprio estado
                 if transicoes1[0] == transicoes[2]:
                     jaAdicionou = True 
-            if not jaAdicionou:   
+            if not jaAdicionou: 
                 if ultimoAlternativo != transicoes[2]:
-                    conversao(conjTransicoes, transicoesConvertidas, alfabeto, transicoes[2])
+                    conversao(conjTransicoes, transicoesConvertidas, alfabeto, transicoes[2]) #chamada recursiva com o último estado resultante adicionado para verificar se há outro estado que não seja inútil
     
-    return conjTransicoes
+    return conjTransicoes #após a adição de todos estados não inúteis, retorna o conjunto de transições que possui estados não inúteis
 
 #Conversão de AFN para AFD
 def conversaoAFN(parametrosEstados):
-    estadosGerados = parametrosEstados[3].copy()
+    estadosGerados = parametrosEstados[3].copy() #realiza uma cópia do conjunto de transições que foi gerado inicialmente
     transicoesConvertidas = []
-    estados = parametrosEstados[3].copy()
+    estados = parametrosEstados[3].copy() #realiza uma cópia para servir de variável auxiliar na concatenação
     
-    atualizarIndice = 0
-    vezes = (2 ** len(estadosGerados)) - 1
+    atualizarIndice = 0 #variável auxiliar para atualizar o índice da lista de estados que foram gerados e poder por meio dela fazer as concatenações
+    vezes = (2 ** len(estadosGerados)) - 1 #conceito de produção das concatenações de estados da conversão em que matematicamente seria 2 elevado a quantidade de estados menos o estado vazio (...- 1)
     i = 0
     k = 0
     j = 0
 
-    while i < vezes:
-        teste = estadosGerados[atualizarIndice].split(', ')
-        ultimoIndiceTeste = len(teste) - 1
+    while i < vezes: #loop para realizar as concatenações 
+        teste = estadosGerados[atualizarIndice].split(', ') #transformação da "string" com os estados em uma lista para que passe por cada estado existente
+        ultimoIndiceTeste = len(teste) - 1 #variável que pega o último índice do estado concatenado que foi adicionado para que por meio dele, seja adicionados os outros que serão concatenados, podendo ser feita uma espécie de agrupamento
         j = 0
-        indiceEstado = 0
-        while j < len(estados):
+        indiceEstado = 0 #variável auxiliar para indicar onde está o estado na qual possui o último estado concatenado (ou agrupado)
+        while j < len(estados): #loop para achar o estado que foi último a ser agrupado
             if estados[j] == teste[ultimoIndiceTeste]:
                 indiceEstado = j
             j += 1
-        k = indiceEstado + 1
-        while k < len(estados):
-            estadosGerados.append(estadosGerados[atualizarIndice] + ', ' + estados[k])
+        k = indiceEstado + 1 #variável que recebe o índice do último estado que foi agrupado e que servirá para procurar outros estados restantes que não foram agrupados
+        while k < len(estados): #loop para agrupar outros estados restantes
+            estadosGerados.append(estadosGerados[atualizarIndice] + ', ' + estados[k]) #adiciona a uma das cópias dos estados existentes, o estado concatenado que também servirá para adicionar estados concatenados dos estados concatenados
             k += 1
         i += 1
         
-        if atualizarIndice != len(estadosGerados) - 1:
+        if atualizarIndice != len(estadosGerados) - 1: #assim que foram feitas todas as concatenações possíveis com o estado que está em evidência para armazenar sua concatenação, é verificado se não atingiu o fim da lista de estados concatenados
             atualizarIndice += 1
     
     conjEstados = []
-    for alfabeto in parametrosEstados[1]:
+    for alfabeto in parametrosEstados[1]: #loop auxiliar de controle que passa por todos símbolos do alfabeto
         i = 0
-        while i < len(estadosGerados):
-            conversoesInicial = ''
-            conversoesFinal = ''
-            teste = estadosGerados[i].split(', ')
+        while i < len(estadosGerados): #loop auxiliar que passa por todos os estados concatenados
+            conversoesInicial = '' #variável auxiliar que servirá para concatenação dos estados de ativação da função de transição 
+            conversoesFinal = '' #variável auxiliar que servirá para concatenação dos estados resultantes da função de transição
+            teste = estadosGerados[i].split(', ') #variável que divide a concatenação dos estados concatenados
             j = 0
-            contagem = 0
-            while j < len(teste):
-                for transicoes in parametrosEstados[4]:
-                    if teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem == 0:
+            contagem = 0 #variável auxiliar que indica se houve o armazenamento da primeira parte do estado concatenado
+            while j < len(teste): #loop que passa pela divisão dos estados concatenados
+                for transicoes in parametrosEstados[4]: #loop que passa por todas as transições para achar a função de transição que corresponde à parte atual do estado concatenado
+                    if teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem == 0: #verifica se os estado de ativação e a parte do estado concatenado coincidem e se na função de transição se trata de apenas um símbolo na qual está no momento atual do loop do alfabeto e se trata-se da primeira parte a ser adicionada
                         conversoesInicial = transicoes[0]
                         conversoesFinal = transicoes[2]
                         contagem += 1
-                    elif teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem != 0:
+                    elif teste[j] == transicoes[0] and alfabeto == transicoes[1] and contagem != 0: #se não for a primeira parte a ser adicionada, faz-se apenas a concatenação
                         
-                        if teste[j] not in conversoesInicial:
+                        if teste[j] not in conversoesInicial: #verifica se já não foi adicionada a parte atual do estado concatenado
                             conversoesInicial = conversoesInicial + ', ' + transicoes[0]
-                            if transicoes[2] not in conversoesFinal:
+                            if transicoes[2] not in conversoesFinal: #verifica se estado resultante da função de transição já não foi adicionado
                                 conversoesFinal = conversoesFinal + ', ' + transicoes[2]
-                            else:
+                            else: #se já foi adicionado, apenas atribui
                                 conversoesFinal = transicoes[2]
-                        else:
+                        else: #se já foi adicionado, apenas atribui (sem concatenar)
                             conversoesInicial = transicoes[0]
                             if transicoes[2] not in conversoesFinal:
                                 conversoesFinal = conversoesFinal + ', ' + transicoes[2]
@@ -221,76 +221,76 @@ def conversaoAFN(parametrosEstados):
                                 conversoesFinal = transicoes[2]
                 j += 1
             i += 1
-            transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal])
-    print(transicoesConvertidas)
+            transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal]) #adiciona as transições que foram concatenadas em outra variável
+    #print(transicoesConvertidas)
 
     conjTransicoes = []
     for alfabeto in parametrosEstados[1]:
         i = 0
         while i < len(transicoesConvertidas):
             if parametrosEstados[0] == transicoesConvertidas[i][0] and alfabeto == transicoesConvertidas[i][1]:
-                conjTransicoes.append(transicoesConvertidas[i])
+                conjTransicoes.append(transicoesConvertidas[i]) #adiciona o primeiro estado de ativação da função de transição para quaisquer símbolos que exista no alfabeto, este que servirá de guia para eliminar os estados inúteis
             i += 1
     
     
-    indice = len(conjTransicoes)
+    indice = len(conjTransicoes) #variável que armazena a última função de transição com o último símbolo possível em relação estados iniciais de ativação da função de transição
     i = 0
-    while i < indice: 
+    while i < indice: #loop com a chamada da função recursiva que passará por todos estados úteis
         conjTransicoes = conversao(conjTransicoes, transicoesConvertidas, parametrosEstados[1], conjTransicoes[i][2])
         i += 1
     #print(conjTransicoes)
 
     i = 0
-    while i < len(conjTransicoes):
+    while i < len(conjTransicoes): #loop para remoção de funções de transição repetidas
         j = i + 1
-        while j < len(conjTransicoes):
-            if conjTransicoes[i][0] == conjTransicoes[j][0] and conjTransicoes[i][1] == conjTransicoes[j][1]:
-                conjTransicoes.remove(conjTransicoes[j])
-                i -= 1
+        while j < len(conjTransicoes): #loop auxiliar para fazer comparação
+            if conjTransicoes[i][0] == conjTransicoes[j][0] and conjTransicoes[i][1] == conjTransicoes[j][1]: #verifica se o estado de ativação da função coincide e possuem o mesmo símbolo, efetuando a remoção 
+                conjTransicoes.remove(conjTransicoes[j]) 
+                i -= 1 #ação que mantém o índice atual da função de transição
             j += 1
         i += 1
     #print(conjTransicoes)
 
     estadoNovo = 'F'
-    transicoesPont = conjTransicoes
+    transicoesPont = conjTransicoes #variável que serve como ponteiro para o "conjunto" de funções de transição
     
-    for transicoes in conjTransicoes:
-        destino = transicoes[2].split(', ')
+    for transicoes in conjTransicoes: #loop para verificar se possui alguma função de transição que leva à transição nula (transição vazia) "eliminando" a transição vazia dando lugar a um estado de rejeição
+        destino = transicoes[2].split(', ') #efetua a separação da concatenação do estado resultante para verificar se há um "estado vazio"
         resultado = ''
         indice = 0
-        for d in destino:
-            if d == '':
+        for d in destino: #loop para passar sobre todos os estados concatenados que foram separados
+            if d == '': #verifica se já no primeiro estado separado é vazio, se sim, atribui um estado novo
                 d = estadoNovo
-            if indice == 0:
+            if indice == 0: #verifica se trata-se da primeira parte do estado concatenado separado, atribuindo-o
                 resultado = d
-            else:
+            else: #se não, apenas concatena 
                 resultado = resultado + ', ' + d
             indice += 1
-        transicoes[2] = resultado
+        transicoes[2] = resultado #atribui à transição que há "estado vazio" o estado novo (estado de rejeição)
     
     
-    novoEstado = False
-    for j in conjTransicoes:
-        if estadoNovo in j[2]:
+    novoEstado = False #variável que libera (ou não) a inclusão do estado de rejeição como um dos estados que faz parte do conjunto de estados
+    for j in conjTransicoes: #loop para verificar se foi incluído o estado de rejeição na transição vazia
+        if estadoNovo in j[2]: 
             novoEstado = True
     
-    if novoEstado:
+    if novoEstado: #se foi incluído na transição vazia, inclui as funções de transição em relação a cada simbolo para o estado de rejeição
         for alfabeto in parametrosEstados[1]:
             transicoesPont.append([estadoNovo, alfabeto, estadoNovo])
      
     
-    for alfabeto in parametrosEstados[1]:
+    for alfabeto in parametrosEstados[1]: 
         for transicoes in conjTransicoes:
-            if transicoes[1] == alfabeto:
+            if transicoes[1] == alfabeto: #verificação por meio de loops auxiliares de transição e do símbolos do alfabeto para armazenar os estados que compõem o conjunto de estados depois que foram convertidos
                 conjEstados.append(transicoes[0])
     conjEstados.append(parametrosEstados[0])
-    copia = set(conjEstados)
-    conjEstados = list(copia)
+    copia = set(conjEstados) #variável que "converte" o conjunto de estados do tipo lista para o tipo set, pois o tipo set é um tipo de lista que não admite duplicações, portanto, eliminando quaisquer tipo de duplicações de estados
+    conjEstados = list(copia) #convertendo de volta os estados
     #print(conjEstados)
      
-    print(conjTransicoes)
+    #print(conjTransicoes)
 
-    return minimizacao(parametrosEstados, conjTransicoes, conjEstados)    
+    return minimizacao(parametrosEstados, conjTransicoes, conjEstados) #retorno com a chamada da função de minimização que também retornará as transições minimizadas
 
 
 def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
@@ -300,7 +300,7 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
     for estados in conjEstados:
         for alfabeto in parametrosEstados[1]:
             for transicoes in conjTransicoes:
-                for finais in parametrosEstados[2]:
+                for finais in parametrosEstados[2]: 
                     if estados == transicoes[2] and transicoes[0] != transicoes[2] and transicoes[1] == alfabeto and finais in estados:
                         conjEstFinais.append(estados)
     
