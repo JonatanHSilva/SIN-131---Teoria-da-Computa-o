@@ -4,155 +4,134 @@ import re
 #Entrada de dados do Automato
 def entradaDados():
     while ValueError:
-        try:
-            estados = int(input('Digite quantos estados possui o automato:\n'))
-            for i in range (estados):
+        try:    #tratamento de exceção para entrada inválida
+            estados = int(input('Digite quantos estados possui o automato:\n')) #entrada e armazenamento com a quantidade de estados do AFN ou AFD
+            for i in range (estados):   #geração dos estados conforme a entrada da quantidade
                 if i == 0:
                     estadosGerados = "q{}".format(i)
                 else:
                     estadosGerados += ",q{}".format(i)
-            estadosGerados = estadosGerados.split(',')
-            alfabeto = str(input('Digite o alfabeto:\n')).split(', ')
+            estadosGerados = estadosGerados.split(',')  #dividindo os estados que foram gerados
+            alfabeto = str(input('Digite o alfabeto:\n')).split(', ')   #entrada e armazenamento dos simbolos que compõem o alfabeto
             transicoes = []
             ambiguidade = []
-            for i in estadosGerados:
+            for i in estadosGerados:    #geração das funções de transição conforme o simbolo
                 for j in alfabeto:
-                    qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"?\n'))
+                    qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"?\n'))  #entrada de quantidade de estados resultantes para uma função de transição
                     ocorrencia = 0
                     for m in range(qtdTransicoes):
-                        ocorrencia += 1
-                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"?\n'.format(i, j))), ocorrencia])
-                    ambiguidade.append([i, j, qtdTransicoes - 1])
+                        ocorrencia += 1 #indicador de ocorrencia de estados resultantes, ou seja, indica se há um estado que há mais de um resultante 
+                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"?\n'.format(i, j))), ocorrencia])   #entrada de dados do estado resultante da função de transição e armazenamento das funções com o estado de ativação de função, o simbolo correspondente, o estado resultante e o indice de ocorrencia deste estado resultante para o estado de ativação definindo "caminhos" para seguir
+                    ambiguidade.append([i, j, qtdTransicoes - 1]) #armazenamento das informações dos estados, sinalizando se há ou não, mais de um resultante e o simbolo na qual ocorre
                     #print(transicoes)
-            estadoInicial = str(input(f'Dentre {estadosGerados}, qual estado seria o inicial? '))
-            estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')
+            estadoInicial = str(input(f'Dentre {estadosGerados}, qual estado seria o inicial? ')) #entrada e armazenamento do estado inicial
+            estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')    #entrada e armazenamento do(s) estado(s) final(is)
             print('Automato Salvo!!!')
-            return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade
+            return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade #retorno com as informações do automato para simulação, conversão, minimização, etc.
         except ValueError:
             print('Entrada inválida, digite apenas números.\n')
    
 
 #Simulação de aceitação de palavras
-def simulacao(parametrosEstados):
-    palavra = str(input('Digite a palavra:'))
-    estadoAtual = parametrosEstados[0]
+def simulacao(parametrosEstados): #apenas um parametro para acessar as variáveis que retornaram, pois elas estão em formato de tuplas
+    palavra = str(input('Digite a palavra:'))   #entrada com a palavra para teste de aceitação
+    estadoAtual = parametrosEstados[0]  #a variável armazena o estado inicial conforme a posição que corresponde ao estado inicial para fazer o movimento entre estados
     estadoTemporario = []
     estadoTeste = []
    
-    sinal = False
-    for i in palavra:
-        for j in parametrosEstados[1]:
+    sinal = False #variável para sinalizar se existe uma ambiguidade que é presente nos AFNs
+    for i in palavra: #loop para passar por cada simbolo da palavra que será testada
+        for j in parametrosEstados[1]: #loop para verificar se existe um simbolo na palavra que não faz parte do alfabeto
             if i == j:
                 break
-        else:
+        else:   #condição para que caso haja algum simbolo que não faça parte do alfabeto, não fazendo a leitura dos simbolos
             print('Palavra rejeitada, pois ela não faz parte do alfabeto')
+            break
+        
         tamanho = 0
-        while tamanho < len(estadoTemporario):
-            estadoTemporario[tamanho][3] = False
+        while tamanho < len(estadoTemporario): #loop para que quando houver alguma ambiguidade de estados resultantes poder retirar a sinalização de estado que foi adicionado recente
+            estadoTemporario[tamanho][3] = False #"variável" dentro da lista de estados que houveram ambiguidades para marcar que o estado não foi adicionado recentemente
             tamanho += 1
-        ocorrencia = False
-        proximaPalavra = False
+        ocorrencia = False #variável que delimita se houve modificação no estado atual para AFD
         ambiguidades = 0
-        entrou = False
-        contagem = 0
-        entrada = 0
-        for k in parametrosEstados[4]:
-            for ambiguidade in parametrosEstados[6]:
-                if not ocorrencia:
-                    if k[0] == ambiguidade[0] and i == ambiguidade[1] and i == k[1]:
-                        ambiguidades = ambiguidade[2]
-            if k[0] == estadoAtual and i == k[1]:
-                if not ocorrencia and ambiguidades == 0:
-                    estadoAtual = k[2]
+        entrou = False #variável que delimita se foi feita alguma modificação na lista de estados que houveram ambiguidade
+        contagem = 0 #variável que servirá para delimitar o armazenamento do resultante do estado que há ambiguidade
+        entrada = 0 #variável que servirá para verificar se houve modificações para todos os estados que depararam com alguma ambiguidade e que foram armazenadas
+        for k in parametrosEstados[4]:  #loop que passará por todas as funções de transição para achar o que corresponde ao simbolo atual e ao(s) estado(s) atual(is) que se encontra(m)
+            for ambiguidade in parametrosEstados[6]:    #loop que passa por todos estados que foram armazenados baseando-se no estado atual da função de transição e retornando a quantidade de ambiguidade (0 ou mais)
+                if not ocorrencia: #verifica se continua sem modificação no estado atual
+                    if k[0] == ambiguidade[0] and i == ambiguidade[1] and i == k[1]: #verifica se o estado de ativação da função possui ambiguidade e se também tanto o simbolo do estado de ativação quanto o simbolo que foi armazenado junto com as outras informações do estado são compatíveis com o simbolo que está sendo lido
+                        ambiguidades = ambiguidade[2] #se compatível, armazena quantas ambiguidades o estado possui (0 ou mais)
+            if k[0] == estadoAtual and i == k[1]: #verifica se o estado de ativação é o estado atual de leitura e se o simbolo do estado de ativação é compatível com o simbolo de leitura atual
+                if not ocorrencia and ambiguidades == 0: #verifica se não houve a modificação para o estado atual e se não há ambiguidades para o estado "atual"
+                    estadoAtual = k[2] #k[0] é o estado de ativação, k[1] é o símbolo, k[2] é o estado resultante e k[3] é a ocorrência para casos de haver ambiguidade
                     ocorrencia = True
-                elif ambiguidades >= 1:
-                    if len(estadoTemporario) < ambiguidades + 1:
-                        if contagem  < ambiguidades + 1:
-                            estadoTemporario.append([k[0], k[3], k[2], True])
-                            contagem += 1
-                    else:
-                        if estadoTemporario[len(estadoTemporario) - 1][0] != k[0]:
-                            if contagem < ambiguidades + 1:
+                elif ambiguidades >= 1: #se há mais de uma ambiguidade para o estado atual e ativa os estados atuais "paralelos"
+                    if len(estadoTemporario) < ambiguidades + 1: #verifica se ainda não adicionou todos os estados na qual houve a "ambiguidade"
+                        if contagem < ambiguidades + 1: #verifica se ainda pode armazenar mais uma função de transição ambígua 
+                            estadoTemporario.append([k[0], k[3], k[2], True]) #armazenamento de uma parte da "maquina" com um dos estados que possuem ambiguidade com apenas o estado de ativação que houve ambiguidade, o indice de ocorrencia, o estado resultante e a variável que determina se ele foi armazenado recentemente, sendo 'True' como que armazenou recentemente
+                            contagem += 1 #contagem de armazenamento de estados
+                    else: 
+                        if estadoTemporario[len(estadoTemporario) - 1][0] != k[0]: #se adicionou todos os estados que houveram ambiguidade, verifica se o estado que houve ambiguidade já não foi armazenado 
+                            if contagem < ambiguidades + 1: 
                                 estadoTemporario.append([k[0], k[3], k[2], True]) 
-                                print(contagem)
+                                #print(contagem)
                                 contagem += 1
                     sinal = True
                     
                 
             
-            if sinal and not entrou:
-                if len(estadoTemporario) < 2:
-                    if k[0] == estadoTemporario[0][2] and i == k[1] and not estadoTemporario[0][3]:
-                        if k[0] != estadoTemporario[0][0]:
+            if sinal and not entrou: #por meio da variável "sinal" é liberado (ou não) as modificações no estados ambiguos e a variável "entrou" é para a modificação feita nos estados ambíguos
+                if len(estadoTemporario) < 2:   #se existe apenas um estado que seja ambíguo, apenas sua modificação será feita
+                    if k[0] == estadoTemporario[0][2] and i == k[1] and not estadoTemporario[0][3]: #verifica se o estado resultante é o mesmo do estado de ativação da função e o simbolo corresponde ao simbolo atual da palavra e também se o estado não foi adicionado recentemente
+                        if k[0] != estadoTemporario[0][0]: #verifica se o estado de ativação não é o estado que houve a ambiguidade
                             estadoTemporario[0][2] = k[2]
                         else:
-                            if estadoTemporario[0][1] == k[3]:
+                            if estadoTemporario[0][1] == k[3]: #se não for o estado que houve ambiguidade, verifica se o indice de ocorrência é compatível para seguir pelo "caminho" que foi definido 
                                 estadoTemporario[0][2] = k[2]
-                        entrou = True
+                        entrou = True #modificação feita
                 else:
                     h = 0
-                    while h < len(estadoTemporario): 
-                        if k[0] == estadoTemporario[h][2] and i == k[1] and not estadoTemporario[h][3]:
+                    while h < len(estadoTemporario): #se existir mais de um estado ambiguo armazenado, passará por todos os estados armazenados
+                        if k[0] == estadoTemporario[h][2] and i == k[1] and not estadoTemporario[h][3]: #verificando se o é o mesmo estado resultante com o estado de ativação da função atual
                             if k[0] != estadoTemporario[h][0]:
                                 estadoTemporario[h][2] = k[2]
-                                entrada += 1
+                                entrada += 1 #uma das modificações foram feitas
                             else:
-                                if ambiguidades > 0:
+                                if ambiguidades > 0: #verifica se o estado de ativação da função atual possui ambiguidades, tendo que escolher o caminho definido, caso haja ambiguidades, ou apenas continuar seguindo.
                                     if estadoTemporario[h][1] == k[3]:
                                         estadoTemporario[h][2] = k[2]
                                         entrada += 1
-                                else:
+                                else: 
                                     estadoTemporario[h][2] = k[2]
                                     entrada += 1
                         h += 1
-                    if entrada == len(estadoTemporario):
+                    if entrada == len(estadoTemporario): #feita todas as modificações dos estados armazenados
                         entrou = True
     h = 0   
-    while h < len(estadoTemporario):
-        for finais in parametrosEstados[2]:
-            if estadoTemporario[h][2] == finais and estadoAtual != finais:
-                estadoAtual = estadoTemporario[h][2]
+    while h < len(estadoTemporario): #loop para verificar se alguma das maquinas que foram dividas para os estados ambíguos chegou em um estado de aceitação
+        for finais in parametrosEstados[2]: #verifica se alguma delas está no estado de aceitação(estado final)
+            if estadoTemporario[h][2] == finais and estadoAtual != finais: 
+                estadoAtual = estadoTemporario[h][2] 
         h += 1
                    
-    if estadoAtual in parametrosEstados[2]:
+    if estadoAtual in parametrosEstados[2]: #se estiver no estado final, palavra aceita
         print('Palavra Aceita!!!')
-    else:
+    else:   #senão, é rejeitada
         print('Palavra Rejeitada!!!')
                 
 
-def simulacaoAFD(parametrosEstados):
-    palavra = str(input('Digite a palavra:'))
-    estadoAtual = parametrosEstados[0]
-    for i in palavra:
-        for j in parametrosEstados[1]:
-            if i == j:
-                break
-        else:
-            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
+#Função que realiza a ordenação de estados
+def num_sort(test_string): 
+    return list(map(int, re.findall(r'\d+', test_string))) #retorna a lista ordenada pelo número dentro da string
 
-        
-        for k in parametrosEstados[4]:
-            if k[0] == estadoAtual and i == k[1]:
-                estadoAtual = k[2]
-                #print(k)
-                #print(estadoAtual)
-                break
-
-
-    if estadoAtual == parametrosEstados[2][0]:
-        print('Palavra Aceita!!!')
-    else:
-        print('Palavra Rejeitada!!!')
-
-def num_sort(test_string):
-    return list(map(int, re.findall(r'\d+', test_string)))
-
+#Função para ordenar os estados
 def ordenado(string):
-    teste = string.split(', ')
-    teste.sort(key=num_sort)
+    teste = string.split(', ') #transformando a string em lista para fazer a ordenação
+    teste.sort(key=num_sort)    #chamada da função da realização de ordenação de estados para ordenar pelo número do estado na string
     concatenacao = ''
     i = 0
-    while i < len(teste):
+    while i < len(teste): #loop para concatenar os elementos da string que foram separados em uma lista para string novamente
         if concatenacao == '':
             concatenacao = teste[i]
         else:
@@ -161,19 +140,27 @@ def ordenado(string):
     
     return concatenacao
 
+
+#Função recursiva para a realização da conversão
 def conversao(conjTransicoes, transicoesConvertidas, alfabeto, ultimoAdicionado):
     ultimoAlternativo = ordenado(ultimoAdicionado)
-    print(ultimoAlternativo)
+    #print(ultimoAlternativo)
 
     for transicoes in transicoesConvertidas:
         if ultimoAlternativo == transicoes[0]:
             transicoes[2] = ordenado(transicoes[2])
             conjTransicoes.append(transicoes)
-            if ultimoAlternativo != transicoes[2]:
-                conversao(conjTransicoes, transicoesConvertidas, alfabeto, transicoes[2])
+            jaAdicionou = False
+            for transicoes1 in conjTransicoes:
+                if transicoes1[0] == transicoes[2]:
+                    jaAdicionou = True 
+            if not jaAdicionou:   
+                if ultimoAlternativo != transicoes[2]:
+                    conversao(conjTransicoes, transicoesConvertidas, alfabeto, transicoes[2])
     
     return conjTransicoes
 
+#Conversão de AFN para AFD
 def conversaoAFN(parametrosEstados):
     estadosGerados = parametrosEstados[3].copy()
     transicoesConvertidas = []
@@ -203,9 +190,6 @@ def conversaoAFN(parametrosEstados):
         if atualizarIndice != len(estadosGerados) - 1:
             atualizarIndice += 1
     
-
-    conjEstIniciais = []
-    conjEstFinais = []
     conjEstados = []
     for alfabeto in parametrosEstados[1]:
         i = 0
@@ -238,29 +222,8 @@ def conversaoAFN(parametrosEstados):
                 j += 1
             i += 1
             transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal])
-    #print(transicoesConvertidas)
-
-    for estados in estadosGerados:
-        for alfabeto in parametrosEstados[1]:
-            for transicoes in transicoesConvertidas:
-                for finais in parametrosEstados[2]:
-                    if estados == transicoes[2] and transicoes[0] != transicoes[2] and transicoes[1] == alfabeto and finais in estados:
-                        conjEstFinais.append(estados)
-    #conjEstFinais.append(parametrosEstados[0])
-    copia = set(conjEstFinais)
-    conjEstFinais = list(copia)
-    #print(conjEstFinais)
-
-    for estados in estadosGerados:
-        for alfabeto in parametrosEstados[1]:
-            for transicoes in transicoesConvertidas:
-                if estados == transicoes[2] and transicoes[0] != transicoes[2] and transicoes[1] == alfabeto:
-                    conjEstados.append(estados)
-    conjEstados.append(parametrosEstados[0])
-    copia = set(conjEstados)
-    conjEstados = list(copia)
-
     print(transicoesConvertidas)
+
     conjTransicoes = []
     for alfabeto in parametrosEstados[1]:
         i = 0
@@ -275,7 +238,7 @@ def conversaoAFN(parametrosEstados):
     while i < indice: 
         conjTransicoes = conversao(conjTransicoes, transicoesConvertidas, parametrosEstados[1], conjTransicoes[i][2])
         i += 1
-   # print(conjTransicoes)
+    #print(conjTransicoes)
 
     i = 0
     while i < len(conjTransicoes):
@@ -315,125 +278,96 @@ def conversaoAFN(parametrosEstados):
         for alfabeto in parametrosEstados[1]:
             transicoesPont.append([estadoNovo, alfabeto, estadoNovo])
      
-    #print(conjTransicoes)
+    
+    for alfabeto in parametrosEstados[1]:
+        for transicoes in conjTransicoes:
+            if transicoes[1] == alfabeto:
+                conjEstados.append(transicoes[0])
+    conjEstados.append(parametrosEstados[0])
+    copia = set(conjEstados)
+    conjEstados = list(copia)
+    #print(conjEstados)
+     
+    print(conjTransicoes)
+
+    return minimizacao(parametrosEstados, conjTransicoes, conjEstados)    
+
+
+def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
+    conjEstIniciais = []
+    conjEstFinais = []
+    
+    for estados in conjEstados:
+        for alfabeto in parametrosEstados[1]:
+            for transicoes in conjTransicoes:
+                for finais in parametrosEstados[2]:
+                    if estados == transicoes[2] and transicoes[0] != transicoes[2] and transicoes[1] == alfabeto and finais in estados:
+                        conjEstFinais.append(estados)
+    
+    copia = set(conjEstFinais)
+    conjEstFinais = list(copia)
+    #print(conjEstFinais)
+    
     i = 0
     while i < len(conjEstados):
+        final = False
         for finais in parametrosEstados[2]:
-            if finais not in conjEstados[i]:
-                conjEstIniciais.append(conjEstados[i])
+            if finais in conjEstados[i]:
+                final = True
+        if not final:
+            conjEstIniciais.append(conjEstados[i])
         i += 1
     estadosSemRepeticao = set(conjEstIniciais)
     conjEstIniciais = list(estadosSemRepeticao)
     #print(conjEstIniciais)
     
-
-    return minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais)    
-                
-'''def minimizacao(parametrosEstados, transicoesModificados, estadoModificados, estadoFinalModificado):
-    transicoesT = transicoesModificados.copy()
-    transicoesMinInicial = []
-    transicoesMinFinal = []
-    transicoesEliminar = transicoesT
-    transicoesCopia = transicoesT.copy()
-    j = 0
-    i = 0
-    
-
-    while j < len(transicoesT):
-        i = j + 1
-        while i < len(transicoesT):
-            for final in parametrosEstados[2]:
-                if final in transicoesT[i][0] and final in transicoesT[j][0] or final not in transicoesT[i][0] and final not in transicoesT[j][0]:
-                    if final in transicoesT[i][2] and final in transicoesT[j][2] or final not in transicoesT[i][2] and final not in transicoesT[j][2]:
-                        if transicoesT[i][1] == transicoesT[j][1]:
-                            transicoesMinInicial.append([transicoesT[i][0], transicoesT[j][0]])
-                            transicoesMinFinal.append([transicoesT[i][2], transicoesT[j][2]])
-                            break
-            i += 1
-        j += 1
-
-    j = 0
-    i = 0
-    
-    while i < len(transicoesMinInicial):
-        while j < len(transicoesMinFinal):
-            
-            for l in transicoesMinFinal:
-                k = 0
-                while k < len(l):
-                    testeFinal = l[k]
-                    #print(l[0])
-                    k += 1
-                
-                for m in transicoesMinInicial:
-                    o = 0
-                    while o < len(m):
-                        testeInicial = m[o]
-                        if testeInicial == testeFinal:
-                            #print(testeInicial)
-                            #print(testeFinal)
-                            for t in transicoesT:
-                                for alfabeto in parametrosEstados[1]:
-                                    if t[0] == testeInicial and t[0] != parametrosEstados[0] and t[2] == testeFinal and t[1] != alfabeto:
-                                        #print(testeInicial)
-                                        #print(t)
-                                        transicoesEliminar.remove(t)
-                                        
-                        o += 1
-            j += 1
-        i += 1
-        aceitacao()'''
-
-def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinais):
-    estadosIniciais = conjEstIniciais
-    estadosFinais = conjEstFinais
     pares = []
     transicoesCopia = conjTransicoes
     
-    indices = []
+    #indices = []
     
     
     indice = 0
     i = 0
-    while i < len(estadosIniciais):
+    while i < len(conjEstIniciais):
         j = i + 1
-        while j < len(estadosIniciais):
-            if estadosIniciais[i] != estadosIniciais[j]:
+        while j < len(conjEstIniciais):
+            if conjEstIniciais[i] != conjEstIniciais[j]:
                 indice += 1
-                pares.append([estadosIniciais[i], estadosIniciais[j], False, indice])
+                pares.append([conjEstIniciais[i], conjEstIniciais[j], False, indice])
             j += 1
         i += 1
 
     i = 0
-    while i < len(estadosFinais):
+    while i < len(conjEstFinais):
         j = i + 1
-        while j < len(estadosFinais):
-            if estadosFinais[i] != estadosFinais[j]:
+        while j < len(conjEstFinais):
+            if conjEstFinais[i] != conjEstFinais[j]:
                 indice += 1
-                pares.append([estadosFinais[i], estadosFinais[j], False, indice])
+                pares.append([conjEstFinais[i], conjEstFinais[j], False, indice])
             j += 1
         i += 1
         
     #print(pares)
 
-                   
-    pares = minimizacaoRecursao(0, -1, pares, conjTransicoes, parametrosEstados[1], 0)
+    for par in pares:          
+        pares = minimizar(par[3] - 1, -1, pares, conjTransicoes, parametrosEstados[1], parametrosEstados[2])
 
     #print(pares)
 
-    if type(pares) != bool:
-        for i in pares:
-            for alfabeto in parametrosEstados[1]:
-                for transicoes in transicoesCopia:
-                    if not i[2]:
-                        if transicoes[0] == i[0] and alfabeto == transicoes[1]:
-                            #print(transicoes[0] + ', ' + i[0])
-                            for t in transicoesCopia:
-                                if t[0] == i[1] and alfabeto == t[1]:
-                                    transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]])
-                                    transicoesCopia.remove(t)
-                                    #if transicoes != None:
-                                    transicoesCopia.remove(transicoes)
+    for i in pares:
+        for alfabeto in parametrosEstados[1]:
+            for transicoes in transicoesCopia:
+                if not i[2]:
+                    if transicoes[0] == i[0] and alfabeto == transicoes[1]:
+                        #print(transicoes[0] + ', ' + i[0])
+                        for t in transicoesCopia:
+                            if t[0] == i[1] and alfabeto == t[1]:
+                                transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]])
+                                transicoesCopia.remove(t)
+                                #if transicoes != None:
+                                transicoesCopia.remove(transicoes)
+        
 
     #print(transicoesCopia)
     for transicoes in transicoesCopia:
@@ -527,64 +461,76 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstIniciais, conjEstFinai
     
     return parametrosEstados[0], parametrosEstados[1], estadoFinal, estadosGerados, transicoesCopia, len(estadosGerados), ambiguidade
     
-
-
-def minimizacaoRecursao(index, prevIndex, peer, transitions, simbolos, contagem):
-    indice = index
-    pares = peer
-    indiceAnterior = prevIndex
-    transicoes = transitions
+def minimizar(indice, indiceAnterior, pares, conjTransicoes, alfabeto, estadoFinal):
     resultado = []
     achou = False
-
-    for alfabeto in simbolos:
-        for estados in transicoes:
-           for t in transicoes:
-                if estados[0] == pares[indice][0] and t[0] == pares[indice][1] and estados[1] == alfabeto and t[1] == alfabeto:
-                    resultado.append([estados[2], t[2]])
-                    break
-
-    #print(pares[indice])
-    #print(resultado)
-    #print(pares[indice])
-
-    for par in pares:
-        for r in resultado:
-            if (r[0] == par[0] and r[1] == par[1]) or (r[0] == par[1] and r[1] == par[0]):
-                achou = True
-                indiceAnterior = indice
-                indice = par[3] - 1
-                #print(indice)
-                break
-            #print(par)
-            #print(r)
-  
-    #print(resultado)
-    #print(len(resultado))
-    #print(contagem)
-    #print(indice)
-    #print(achou)
-    if achou and contagem == 0:
-        pares[indice][2] = minimizacaoRecursao(indice, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
-        return pares
-    elif achou and contagem < len(resultado) and contagem != 0:
-        pares[indice][2] = minimizacaoRecursao(indice, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
-        return pares[indice][2]
-    elif achou and contagem == len(resultado) or indice == indiceAnterior:
-        return True
-    elif not achou and contagem == 0:
-        pares[indice][2] = minimizacaoRecursao(indice + 1, indiceAnterior, pares, transicoes, simbolos, contagem + 1)
-        return pares
-    elif not achou and contagem != 0:
-        return True
-
     
-
+    #print(pares[indice])
+    
+    for simbolo in alfabeto:
+        for estado1 in conjTransicoes:
+            for estado2 in conjTransicoes:
+                if estado1[0] == pares[indice][0] and estado2[0] == pares[indice][1] and estado1[1] == simbolo and estado2[1] == simbolo:
+                    resultado.append([estado1[2], estado2[2]])
+                    break
+    #print(resultado)
+    for r in resultado:
+        for par in pares:
+            if (r[0] == par[0] and r[1] == par[1]) or (r[0] == par[1] and r[1] == par[0]):  
+                #print(r)
+                if indice != indiceAnterior:
+                    achou = True
+                    pares = minimizar(par[3] - 1, indice, pares, conjTransicoes, alfabeto, estadoFinal)
+                    if par[2]:
+                        achou = False
+    
+    
+    if not achou:
+        contagem = 0
+        finais = False
+        pares[indice][2] = True
+        for r in resultado:
+            if r[0] == r[1]:
+                contagem += 1
+            if contagem >= 1:
+                for final in estadoFinal:
+                    if final in r[0] and final in r[1] and r[0] != r[1]:
+                        finais = True
+                        #print('a')
+        #print(contagem)
+        if contagem == len(resultado) or (contagem >= len(resultado) / 2 and finais):
+            pares[indice][2] = False
+    return pares
+    
+    
 parametros = entradaDados()
 parametrosMinimizados = conversaoAFN(parametros)
 #while True:
 simulacao(parametros)
 simulacao(parametrosMinimizados)
 
+'''def simulacaoAFD(parametrosEstados):
+    palavra = str(input('Digite a palavra:'))
+    estadoAtual = parametrosEstados[0]
+    for i in palavra:
+        for j in parametrosEstados[1]:
+            if i == j:
+                break
+        else:
+            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
+
+        
+        for k in parametrosEstados[4]:
+            if k[0] == estadoAtual and i == k[1]:
+                estadoAtual = k[2]
+                #print(k)
+                #print(estadoAtual)
+                break
+
+
+    if estadoAtual == parametrosEstados[2][0]:
+        print('Palavra Aceita!!!')
+    else:
+        print('Palavra Rejeitada!!!')'''
 
 
