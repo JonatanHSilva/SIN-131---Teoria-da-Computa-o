@@ -4,7 +4,7 @@ import re
 def entradaDados():
     while ValueError:
         try:    #tratamento de exceção para entrada inválida
-            estados = int(input('Digite quantos estados possui o automato:\n')) #entrada e armazenamento com a quantidade de estados do AFN ou AFD
+            estados = int(input('Digite quantos estados possui o automato: ')) #entrada e armazenamento com a quantidade de estados do AFN ou AFD
             for i in range (estados):   #geração dos estados conforme a entrada da quantidade
                 if i == 0:
                     estadosGerados = "q{}".format(i)
@@ -16,14 +16,14 @@ def entradaDados():
             ambiguidade = []
             for i in estadosGerados:    #geração das funções de transição conforme o simbolo
                 for j in alfabeto:
-                    qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"?\n'))  #entrada de quantidade de estados resultantes para uma função de transição
+                    qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"? '))  #entrada de quantidade de estados resultantes para uma função de transição
                     ocorrencia = 0
                     for m in range(qtdTransicoes):
                         ocorrencia += 1 #indicador de ocorrencia de estados resultantes, ou seja, indica se há um estado que há mais de um resultante 
-                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"?\n'.format(i, j))), ocorrencia])   #entrada de dados do estado resultante da função de transição e armazenamento das funções com o estado de ativação de função, o simbolo correspondente, o estado resultante e o indice de ocorrencia deste estado resultante para o estado de ativação definindo "caminhos" para seguir
+                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"? '.format(i, j))), ocorrencia])   #entrada de dados do estado resultante da função de transição e armazenamento das funções com o estado de ativação de função, o simbolo correspondente, o estado resultante e o indice de ocorrencia deste estado resultante para o estado de ativação definindo "caminhos" para seguir
                     ambiguidade.append([i, j, qtdTransicoes - 1]) #armazenamento das informações dos estados, sinalizando se há ou não, mais de um resultante e o simbolo na qual ocorre
                     #print(transicoes)
-            estadoInicial = str(input(f'Dentre {estadosGerados}, qual estado seria o inicial? ')) #entrada e armazenamento do estado inicial
+            estadoInicial = 'q' + str(int(input(f'Dentre {estadosGerados}, qual estado seria o inicial? q'))) #entrada e armazenamento do estado inicial
             estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')    #entrada e armazenamento do(s) estado(s) final(is)
             print('Automato Salvo!!!')
             return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade #retorno com as informações do automato para simulação, conversão, minimização, etc.
@@ -33,7 +33,7 @@ def entradaDados():
 
 #Simulação de aceitação de palavras
 def simulacao(parametrosEstados): #apenas um parametro para acessar as variáveis que retornaram, pois elas estão em formato de tuplas
-    palavra = str(input('Digite a palavra:'))   #entrada com a palavra para teste de aceitação
+    palavra = str(input('Digite a palavra: '))   #entrada com a palavra para teste de aceitação
     estadoAtual = parametrosEstados[0]  #a variável armazena o estado inicial conforme a posição que corresponde ao estado inicial para fazer o movimento entre estados
     estadoTemporario = []
     estadoTeste = []
@@ -86,13 +86,13 @@ def simulacao(parametrosEstados): #apenas um parametro para acessar as variávei
                         if k[0] != estadoTemporario[0][0]: #verifica se o estado de ativação não é o estado que houve a ambiguidade
                             estadoTemporario[0][2] = k[2]
                         else:
-                            if estadoTemporario[0][1] == k[3]: #se não for o estado que houve ambiguidade, verifica se o indice de ocorrência é compatível para seguir pelo "caminho" que foi definido 
+                            if estadoTemporario[0][1] == k[3]: #se for o estado que houve ambiguidade, verifica se o indice de ocorrência é compatível para seguir pelo "caminho" que foi definido 
                                 estadoTemporario[0][2] = k[2]
                         entrou = True #modificação feita
                 else:
                     h = 0
-                    while h < len(estadoTemporario): #se existir mais de um estado ambiguo armazenado, passará por todos os estados armazenados
-                        if k[0] == estadoTemporario[h][2] and i == k[1] and not estadoTemporario[h][3]: #verificando se o é o mesmo estado resultante com o estado de ativação da função atual
+                    while h < len(estadoTemporario): #se existir mais de um estado ambíguo armazenado, passará por todos os estados armazenados
+                        if k[0] == estadoTemporario[h][2] and i == k[1] and not estadoTemporario[h][3]: #verificando se estado de ativação é o mesmo estado resultante com o estado de ativação da função atual
                             if k[0] != estadoTemporario[h][0]:
                                 estadoTemporario[h][2] = k[2]
                                 entrada += 1 #uma das modificações foram feitas
@@ -285,7 +285,7 @@ def conversaoAFN(parametrosEstados):
     conjEstados.append(parametrosEstados[0])
     copia = set(conjEstados) #variável que "converte" o conjunto de estados do tipo lista para o tipo set, pois o tipo set é um tipo de lista que não admite duplicações, portanto, eliminando quaisquer tipo de duplicações de estados
     conjEstados = list(copia) #convertendo de volta os estados
-    print(conjEstados)
+    #print(conjEstados)
      
     #print(conjTransicoes)
 
@@ -357,142 +357,133 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
                         for t in transicoesCopia: #loop para verificar o outro par
                             if t[0] == i[1] and alfabeto == t[1]: #verifica se o outro par é compatível com a transição e o simbolo correspondente ao loop de controle
                                 transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]]) #adiciona a transição com os pares fundidos
-                                transicoesCopia.remove(t) #remove a transição de um dos pares que farão fusão, dando lugar aos pares fundidos
+                                transicoesCopia.remove(t) #remove a transição de um dos pares que fizeram fusão, dando lugar aos pares fundidos
                                 transicoesCopia.remove(transicoes) #remove a transição do outro par
         
 
     #print(transicoesCopia)
-    for transicoes in transicoesCopia:
-        entradaSRepeticao = ''
-        saidaSRepeticao = ''
-        entrada = transicoes[0].split(', ')
-        saida = transicoes[2].split(', ')
+    for transicoes in transicoesCopia:    #loop que passará por todas as transições e verificará se ha alguma transição fundida com estado de ativação e estado resultante de "mesmo nome"
+        entradaSRepeticao = '' #variável que servirá para concatenação do estado de ativação que será separado
+        saidaSRepeticao = '' #variável que servirá para concatenação do estado resultante que será separado
+        entrada = transicoes[0].split(', ') #separação do estado de ativação para fazer a comparação
+        saida = transicoes[2].split(', ') #separação do estado resultante para fazer a comparação
         i = 0
-        while i < len(entrada):
+        while i < len(entrada): #loop do estado de ativação separado da transição atual passando por cada estado separado
             j = i + 1
-            removeu = False
-            while j < len(entrada):
-                if entrada[i] == entrada[j]:
-                    entrada.remove(entrada[j])
+            removeu = False #variável de controle para efetuar a mudança de índice na remoção do estado repetido
+            while j < len(entrada): #loop auxiliar para fazer a comparação
+                if entrada[i] == entrada[j]: #verifica se no estado de ativação há um estado igual
+                    entrada.remove(entrada[j]) #remove um dos iguais
                     removeu = True
                 j += 1
-            if not removeu:
+            if not removeu: #verifica se foi removido para manter o índice do que está verificando e poder remover mais repetições
                 i += 1
         
         i = 0
-        while i < len(entrada):
+        while i < len(entrada): #loop para fazer a concatenação novamente do estado de ativação que foi separado
             if entradaSRepeticao == '':
                 entradaSRepeticao = entrada[i]
             else:
                 entradaSRepeticao = entradaSRepeticao + ', ' + entrada[i]
             i += 1
         #print(entradaSRepeticao)
-        transicoes[0] = entradaSRepeticao
+        transicoes[0] = entradaSRepeticao #armazena no estado de ativação da função de transição atual o estado sem repetições
 
         
         i = 0
-        while i < len(saida):
+        while i < len(saida): #loop de cada estado resultante que foi separado da transição atual passando por cada estado resultante separado
             removeu = False
             j = i + 1
             #print(saida[i])
-            while j < len(saida):
-                
-                if saida[i] == saida[j]:
-                    saida.remove(saida[j])
+            while j < len(saida): #loop auxiliar para comparação de cada estado resultante separado
+                if saida[i] == saida[j]: #verifica se no estado resultante, há um outro igual
+                    saida.remove(saida[j]) #remove o estado igual
                     removeu = True
-                #elif saida[i] == saida[j] and i == 0:
-                    #saida.remove(saida[i])
                 j += 1
-            if not removeu:
+            if not removeu: #verificando se foi removido para manter o índice do estado que está sendo verificado se há repetição
                 i += 1
       
         i = 0
-        while i < len(saida):
+        while i < len(saida): #loop para concatenação do estado resultante que foi separado da transição atual
             if saidaSRepeticao == '':
                 saidaSRepeticao = saida[i]
             else:
                 saidaSRepeticao = saidaSRepeticao + ', ' + saida[i]
             i += 1
         #print(saidaSRepeticao)
-        transicoes[2] = saidaSRepeticao
+        transicoes[2] = saidaSRepeticao #armazena no estado resultante da função de transição atual o estado sem repetições
     #print(transicoesCopia)
 
-    for alfabeto in parametrosEstados[1]:
-        for transicoes in transicoesCopia:
-            achou = False
-            for t in transicoesCopia:
-                if transicoes[2] == t[0]:
+    for alfabeto in parametrosEstados[1]: #loop de controle passando por cada elemento do alfabeto
+        for transicoes in transicoesCopia: #loop passando por cada transição para verificar se há alguma função com transição a um estado inexistente
+            achou = False #variável de controle para verificar se a transição atual possui transição existente
+            for t in transicoesCopia: #loop auxiliar que achará a transição existente (ou não)
+                if transicoes[2] == t[0]: #se possuir uma transição existente para a atual, altera a variável de controle
                     achou = True
             
-            if not achou:
+            if not achou: #se a variável de controle não foi alterada, não possui transição existente, assim sendo alterada o estado resultante para o próprio estado
                 transicoes[2] = transicoes[0]
 
     
-    estadoFinal = ''
-    for transicoes in transicoesCopia:
-        for finais in parametrosEstados[2]:
-            if finais in transicoes[0]:
-                estadoFinal = transicoes[0]
+    estadoFinal = []
+    for transicoes in transicoesCopia: #loop para pegar todos os estados finais que foram convertidos e minimizados
+        for finais in parametrosEstados[2]: #loop que passa pelos estados finais antes da conversão e minimização para marcar os estados finais e "atualizar"
+            if finais in transicoes[0]: #verifica se o estado de ativação é um estado final
+                estadoFinal.append(transicoes[0]) #armazena os estados finais
     
     estadosGerados = []
-    for alfabeto in parametrosEstados[1]:
-        for transicoes in transicoesCopia:
-            if alfabeto == transicoes[1]:
-                estadosGerados.append(transicoes[0])
-    estadosCopia = set(estadosGerados)
-    estadosGerados = list(estadosCopia)
+    for alfabeto in parametrosEstados[1]: #loop de controle passando por cada elemento do alfabeto
+        for transicoes in transicoesCopia: #loop que passa por todas as funções de transição
+            if alfabeto == transicoes[1]: #verifica se o símbolo corresponde ao símbolo da função de transição
+                estadosGerados.append(transicoes[0]) #armazena os estados de ativação das funções de transição, pois estes serão os novos estados 
+    estadosCopia = set(estadosGerados) #remove estados repetidos convertendo para o tipo set
+    estadosGerados = list(estadosCopia) #converte de volta para o tipo lista'
 
     ambiguidade = []
-    for estados in estadosGerados:
+    for estados in estadosGerados: #loop passando por todos novos estados que foram armazenados fazendo a criação do novo parametro "ambiguidade" assim, sem que haja alguma ambiguidade, pois os estados foram minimizados
         for alfabeto in parametrosEstados[1]:
-            ambiguidade.append([estados, alfabeto, 0])
+            ambiguidade.append([estados, alfabeto, 0]) 
     
     #print(estadosGerados)
     #print(estadoFinal)
-    #print(transicoesCopia)
+    print(transicoesCopia)
     
-    return parametrosEstados[0], parametrosEstados[1], estadoFinal, estadosGerados, transicoesCopia, len(estadosGerados), ambiguidade
+    return parametrosEstados[0], parametrosEstados[1], estadoFinal, estadosGerados, transicoesCopia, len(estadosGerados), ambiguidade #retorna todos os parametros necessarios para a simulação, sendo eles: o estado inicial (que não muda), o alfabeto, o estado final (depois da minimização), o conjunto de estados (depois da minimização), as transições minimizadas, quantidade de estados e o conjunto de ambiguidades (para controle na simulação)
     
 def minimizar(indice, indiceAnterior, pares, conjTransicoes, alfabeto, estadoFinal):
     resultado = []
-    achou = False
+    achou = False #variável de controle para caso não ache o par que ficou para ser marcado, marque o par que está fazendo a verificação de marcação (pois este corresponde aos pares já "marcados")
     
     #print(pares[indice])
     
-    for simbolo in alfabeto:
-        for estado1 in conjTransicoes:
-            for estado2 in conjTransicoes:
-                if estado1[0] == pares[indice][0] and estado2[0] == pares[indice][1] and estado1[1] == simbolo and estado2[1] == simbolo:
-                    resultado.append([estado1[2], estado2[2]])
+    for simbolo in alfabeto: #loop de controle para verificação de qual símbolo que se trata
+        for estado1 in conjTransicoes: #loop para encontrar o estado de ativação que corresponde ao primeiro par
+            for estado2 in conjTransicoes: #loop para encontrar o estado de ativação que corresponde ao segundo par
+                if estado1[0] == pares[indice][0] and estado2[0] == pares[indice][1] and estado1[1] == simbolo and estado2[1] == simbolo: #verifica se os pares de cada loop corresponde ao par que foi gerado para verificar a possibilidade de minimizar e verifica se os dois se tratam do mesmo símbolo
+                    resultado.append([estado1[2], estado2[2]]) #armazena o estados resultantes de cada par e para cada símbolo, dependo do símbolo atual que corresponde ao loop do alfabeto
                     break
-    #print(resultado)
-    for r in resultado:
-        for par in pares:
-            if (r[0] == par[0] and r[1] == par[1]) or (r[0] == par[1] and r[1] == par[0]):  
+    print(resultado)
+    contagem = 0
+    for r in resultado: #loop que passa pelos outros pares formados pelos estados resultantes dos pares iniciais
+        for par in pares: #loop que passa pelos pares iniciais e verifica se os pares resultantes estão dentro dos pares iniciais (onde os pares iniciais são os pares a serem "marcados")
+            if (r[0] == par[0] and r[1] == par[1]) or (r[0] == par[1] and r[1] == par[0]): #verifica se o par resultante corresponde a um dos pares iniciais
                 #print(r)
-                if indice != indiceAnterior:
+                if indice != indiceAnterior: #verifica se o índice do par atual já foi verificado e que o par resultante corresponde ao próprio par inicial
+                    pares = minimizar(par[3] - 1, indice, pares, conjTransicoes, alfabeto, estadoFinal) #chamada recursiva para o par achado com o índice do par atual para verificar se acha os pares dos resultados e, assim, sucessivamente
+                    
+                        
+    contagem = 0
+    for r in resultado: #loop para verificar os pares de resultados, se um ou mais pares levam é um mesmo estado e/ou é um estado final (este loop é exclusivo para caso há um par resultante que contém dentro dos pares iniciais ficando num "loop" com estes dois pares)
+        if r[0] == r[1]: #verifica se o par resultante são o mesmo estado
+            contagem += 1
+        else:
+            for par in pares: #loop para conferir se o par que não é igual, está no conjunto de pares, se sim, marca o par com a alteração da variável controle "achou", na qual, achou sendo True seria o par que não pode fundir
+                if (r[0] == par[0] and r[1] == par[1]) or (r[0] == par[1] and r[1] == par[0]):
                     achou = True
-                    pares = minimizar(par[3] - 1, indice, pares, conjTransicoes, alfabeto, estadoFinal)
-                    if par[2]:
-                        achou = False
     
-    
-    if not achou:
-        contagem = 0
-        finais = False
-        pares[indice][2] = True
-        for r in resultado:
-            if r[0] == r[1]:
-                contagem += 1
-            if contagem >= 1:
-                for final in estadoFinal:
-                    if final in r[0] and final in r[1] and r[0] != r[1]:
-                        finais = True
-                        #print('a')
-        #print(contagem)
-        if contagem == len(resultado) or (contagem >= len(resultado) / 2 and finais):
-            pares[indice][2] = False
-    return pares
+    if not achou and contagem < len(resultado): #se a variável de controle deu falso é porque possui um par "marcado" seja porque foi marcado por se trata de pares que levam um ao outro ou por não estar na lista de pares para serem marcados, ou seja, um par já marcado e se os pares resultantes não forem todos estados iguais
+        pares[indice][2] = True #"marca o par"
+    return pares #retorno do conjunto de pares com a "marcação" (ou não) do par
     
     
 parametros = entradaDados()
