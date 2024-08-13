@@ -295,6 +295,7 @@ def conversaoAFN(parametrosEstados):
 def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
     conjEstIniciais = []
     conjEstFinais = []
+    estadoInicial = parametrosEstados[0]
     
     for estados in conjEstados: #loop para verificar quais estados do conjunto de estados é(são) final(is)
         for finais in parametrosEstados[2]: #loop para passar pelo(s) estado(s) final(is) 
@@ -356,10 +357,34 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
                         #print(transicoes[0] + ', ' + i[0])
                         for t in transicoesCopia: #loop para verificar o outro par
                             if t[0] == i[1] and alfabeto == t[1]: #verifica se o outro par é compatível com a transição e o simbolo correspondente ao loop de controle
+                                if estadoInicial == t[0] or estadoInicial == transicoes[0]:
+                                    estadoInicial = i[0] + ', ' + i[i]
                                 transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]]) #adiciona a transição com os pares fundidos
                                 transicoesCopia.remove(t) #remove a transição de um dos pares que fizeram fusão, dando lugar aos pares fundidos
                                 transicoesCopia.remove(transicoes) #remove a transição do outro par
         
+    
+    estado = estadoInicial.split(', ')
+    i = 0
+    while i < len(estado):
+        removeu = False
+        j = i + 1
+        while j < len(estado):
+            if estado[i] == estado[j]:
+                estado.remove(estado[j])
+                removeu = True
+            j += 1
+        if not removeu:
+            i += 1
+    
+    estadoInicial = ''
+    i = 0
+    while i < len(estado):
+        if estadoInicial == '':
+            estadoInicial = estado[i]
+        else:
+            estadoInicial = estadoInicial + ', ' + estado[i]
+        i += 1
 
     #print(transicoesCopia)
     for transicoes in transicoesCopia:    #loop que passará por todas as transições e verificará se ha alguma transição fundida com estado de ativação e estado resultante de "mesmo nome"
@@ -448,7 +473,7 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
     #print(estadoFinal)
     print(transicoesCopia)
     
-    return parametrosEstados[0], parametrosEstados[1], estadoFinal, estadosGerados, transicoesCopia, len(estadosGerados), ambiguidade #retorna todos os parametros necessarios para a simulação, sendo eles: o estado inicial (que não muda), o alfabeto, o estado final (depois da minimização), o conjunto de estados (depois da minimização), as transições minimizadas, quantidade de estados e o conjunto de ambiguidades (para controle na simulação)
+    return estadoInicial, parametrosEstados[1], estadoFinal, estadosGerados, transicoesCopia, len(estadosGerados), ambiguidade #retorna todos os parametros necessarios para a simulação, sendo eles: o estado inicial (que não muda), o alfabeto, o estado final (depois da minimização), o conjunto de estados (depois da minimização), as transições minimizadas, quantidade de estados e o conjunto de ambiguidades (para controle na simulação)
     
 def minimizar(indice, indiceAnterior, pares, conjTransicoes, alfabeto, estadoFinal):
     resultado = []
@@ -492,28 +517,5 @@ parametrosMinimizados = conversaoAFN(parametros)
 simulacao(parametros)
 simulacao(parametrosMinimizados)
 
-'''def simulacaoAFD(parametrosEstados):
-    palavra = str(input('Digite a palavra:'))
-    estadoAtual = parametrosEstados[0]
-    for i in palavra:
-        for j in parametrosEstados[1]:
-            if i == j:
-                break
-        else:
-            print('Palavra rejeitada, pois ela não faz parte do alfabeto')
-
-        
-        for k in parametrosEstados[4]:
-            if k[0] == estadoAtual and i == k[1]:
-                estadoAtual = k[2]
-                #print(k)
-                #print(estadoAtual)
-                break
-
-
-    if estadoAtual == parametrosEstados[2][0]:
-        print('Palavra Aceita!!!')
-    else:
-        print('Palavra Rejeitada!!!')'''
 
 
