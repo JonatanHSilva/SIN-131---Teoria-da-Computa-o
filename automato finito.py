@@ -1,4 +1,8 @@
 import re
+import networkx as nx
+import matplotlib.pyplot as plt
+import itertools as it
+import numpy as np
 
 #Entrada de dados do Automato
 def entradaDados():
@@ -510,12 +514,49 @@ def minimizar(indice, indiceAnterior, pares, conjTransicoes, alfabeto, estadoFin
         pares[indice][2] = True #"marca o par"
     return pares #retorno do conjunto de pares com a "marcação" (ou não) do par
     
+def desenhar_grafo(grafo, nome_atributo):
+    estiloConexao = [f"arc3,rad={r}" for r in it.accumulate([0.1] * 4)]
+
+    pos = nx.planar_layout(grafo)
+    nx.draw_networkx_nodes(grafo, pos, node_color='white', edgecolors='black', linewidths=2, node_size=1000)
+    nx.draw_networkx_labels(grafo, pos, font_size=10)
+    nx.draw_networkx_edges(
+        grafo, pos, edge_color="black", connectionstyle=estiloConexao, min_target_margin=20
+    )
+
+    labels = {
+        tuple(edge): f"{atributos[nome_atributo]}"
+        for *edge, atributos in grafo.edges(data=True)
+    }
+    nx.draw_networkx_edge_labels(
+        grafo,
+        pos,
+        labels,
+        connectionstyle=estiloConexao,
+        font_color="black",
+        bbox={"alpha":1, "facecolor":'white', "edgecolor":'white', 'boxstyle':'square, pad=0'},
+    )
+
+def criarGrafo(parametrosEstados):
+    estados = parametrosEstados[3]
+    transicoes = parametrosEstados[4]
+    fig, eixo = plt.subplots(1, 1)
+    grafo = nx.MultiDiGraph()
+
     
+    for t in transicoes:
+        grafo.add_edge(t[0], t[2], alfabeto=t[1])
+    desenhar_grafo(grafo, 'alfabeto')    
+    
+    fig.tight_layout()
+    plt.show()
+
 parametros = entradaDados()
-parametrosMinimizados = conversaoAFN(parametros)
+criarGrafo(parametros)
+#parametrosMinimizados = conversaoAFN(parametros)
 #while True:
-simulacao(parametros)
-simulacao(parametrosMinimizados)
+#simulacao(parametros)
+#simulacao(parametrosMinimizados)
 
 
 
