@@ -3,6 +3,22 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import itertools as it
 import numpy as np
+import os
+import json
+
+def diretorio():
+    diretorioAtual = os.path.dirname(__file__)
+    diretorioArquivo = os.path.join(diretorioAtual, "automato.json")
+    return diretorioArquivo
+
+def criacaoArquivo(parametrosEstados):
+    arquivo = open(diretorio(), "w")
+    json.dump(parametrosEstados, arquivo)
+    arquivo.close()
+
+def leituraArquivo():
+    arquivo = open(diretorio(), "r")
+    return json.load(arquivo)
 
 #Entrada de dados do Automato
 def entradaDados():
@@ -37,7 +53,6 @@ def entradaDados():
 
 #Simulação de aceitação de palavras
 def simulacao(parametrosEstados): #apenas um parametro para acessar as variáveis que retornaram, pois elas estão em formato de tuplas
-    palavra = str(input('Digite a palavra: '))   #entrada com a palavra para teste de aceitação
     estadoAtual = parametrosEstados[0]  #a variável armazena o estado inicial conforme a posição que corresponde ao estado inicial para fazer o movimento entre estados
     estadoTemporario = []
     estadoTeste = []
@@ -551,8 +566,17 @@ def criarGrafo(parametrosEstados):
     fig.tight_layout()
     plt.show()
 
-parametros = entradaDados()
-criarGrafo(parametros)
+
+def teste():
+    string1 = input("Digite aqui: ")
+    string2 = input("Digite mais uma vez: ")
+    return string1, string2
+
+if not os.path.exists(diretorio()):
+    parametros = entradaDados()
+    criacaoArquivo(parametros)
+automato = leituraArquivo()
+#criarGrafo(parametros)
 #parametrosMinimizados = conversaoAFN(parametros)
 #while True:
 #simulacao(parametros)
