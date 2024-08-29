@@ -567,16 +567,11 @@ def criarGrafo(parametrosEstados):
     plt.show()
 
 
-def teste():
-    string1 = input("Digite aqui: ")
-    string2 = input("Digite mais uma vez: ")
-    return string1, string2
-
 if not os.path.exists(diretorio()):
     parametros = entradaDados()
     criacaoArquivo(parametros)
 automato = leituraArquivo()
-#criarGrafo(parametros)
+#criarGrafo(automato)
 #parametrosMinimizados = conversaoAFN(parametros)
 #while True:
 #simulacao(parametros)
