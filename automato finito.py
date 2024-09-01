@@ -529,11 +529,13 @@ def minimizar(indice, indiceAnterior, pares, conjTransicoes, alfabeto, estadoFin
         pares[indice][2] = True #"marca o par"
     return pares #retorno do conjunto de pares com a "marcação" (ou não) do par
     
-def desenhar_grafo(grafo, nome_atributo):
+def desenhar_grafo(grafo, nome_atributo, final):
     estiloConexao = [f"arc3,rad={r}" for r in it.accumulate([0.1] * 4)]
 
     pos = nx.planar_layout(grafo)
     nx.draw_networkx_nodes(grafo, pos, node_color='white', edgecolors='black', linewidths=2, node_size=1000)
+    for f in final:
+        nx.draw_networkx_nodes(grafo, pos, nodelist=f, node_color='white', edgecolors='black', linewidths=2, node_size=1500)
     nx.draw_networkx_labels(grafo, pos, font_size=10)
     nx.draw_networkx_edges(
         grafo, pos, edge_color="black", connectionstyle=estiloConexao, min_target_margin=20
@@ -557,11 +559,10 @@ def criarGrafo(parametrosEstados):
     transicoes = parametrosEstados[4]
     fig, eixo = plt.subplots(1, 1)
     grafo = nx.MultiDiGraph()
-
     
     for t in transicoes:
         grafo.add_edge(t[0], t[2], alfabeto=t[1])
-    desenhar_grafo(grafo, 'alfabeto')    
+    desenhar_grafo(grafo, 'alfabeto', parametrosEstados[2])    
     
     fig.tight_layout()
     plt.show()
@@ -571,7 +572,7 @@ if not os.path.exists(diretorio()):
     parametros = entradaDados()
     criacaoArquivo(parametros)
 automato = leituraArquivo()
-#criarGrafo(automato)
+criarGrafo(automato)
 #parametrosMinimizados = conversaoAFN(parametros)
 #while True:
 #simulacao(parametros)
