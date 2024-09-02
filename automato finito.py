@@ -6,18 +6,18 @@ import numpy as np
 import os
 import json
 
-def diretorio():
+def diretorio(nomeArquivo):
     diretorioAtual = os.path.dirname(__file__)
-    diretorioArquivo = os.path.join(diretorioAtual, "automato.json")
+    diretorioArquivo = os.path.join(diretorioAtual, nomeArquivo + ".json")
     return diretorioArquivo
 
-def criacaoArquivo(parametrosEstados):
-    arquivo = open(diretorio(), "w")
+def criacaoArquivo(parametrosEstados, nomeArquivo):
+    arquivo = open(diretorio(nomeArquivo), "w")
     json.dump(parametrosEstados, arquivo)
     arquivo.close()
 
-def leituraArquivo():
-    arquivo = open(diretorio(), "r")
+def leituraArquivo(nomeArquivo):
+    arquivo = open(diretorio(nomeArquivo), "r")
     return json.load(arquivo)
 
 #Entrada de dados do Automato
@@ -175,7 +175,7 @@ def conversao(conjTransicoes, transicoesConvertidas, alfabeto, ultimoAdicionado)
             if not jaAdicionou: 
                 if ultimoAlternativo != transicoes[2]:
                     conversao(conjTransicoes, transicoesConvertidas, alfabeto, transicoes[2]) #chamada recursiva com o último estado resultante adicionado para verificar se há outro estado que não seja inútil
-    
+    #print(conjTransicoes)
     return conjTransicoes #após a adição de todos estados não inúteis, retorna o conjunto de transições que possui estados não inúteis
 
 #Conversão de AFN para AFD
@@ -207,7 +207,7 @@ def conversaoAFN(parametrosEstados):
         
         if atualizarIndice != len(estadosGerados) - 1: #assim que foram feitas todas as concatenações possíveis com o estado que está em evidência para armazenar sua concatenação, é verificado se não atingiu o fim da lista de estados concatenados
             atualizarIndice += 1
-    
+    #print(estadosGerados)
     conjEstados = []
     for alfabeto in parametrosEstados[1]: #loop auxiliar de controle que passa por todos símbolos do alfabeto
         i = 0
@@ -240,7 +240,6 @@ def conversaoAFN(parametrosEstados):
                 j += 1
             i += 1
             transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal]) #adiciona as transições que foram concatenadas em outra variável
-    #print(transicoesConvertidas)
 
     conjTransicoes = []
     for alfabeto in parametrosEstados[1]:
@@ -250,13 +249,11 @@ def conversaoAFN(parametrosEstados):
                 conjTransicoes.append(transicoesConvertidas[i]) #adiciona o primeiro estado de ativação da função de transição para quaisquer símbolos que exista no alfabeto, este que servirá de guia para eliminar os estados inúteis
             i += 1
     
-    
     indice = len(conjTransicoes) #variável que armazena a última função de transição com o último símbolo possível em relação estados iniciais de ativação da função de transição
     i = 0
     while i < indice: #loop com a chamada da função recursiva que passará por todos estados úteis
         conjTransicoes = conversao(conjTransicoes, transicoesConvertidas, parametrosEstados[1], conjTransicoes[i][2])
         i += 1
-    #print(conjTransicoes)
 
     i = 0
     while i < len(conjTransicoes): #loop para remoção de funções de transição repetidas
@@ -490,7 +487,7 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
     
     #print(estadosGerados)
     #print(estadoFinal)
-    print(transicoesCopia)
+    #print(transicoesCopia)
     
     return estadoInicial, parametrosEstados[1], estadoFinal, estadosGerados, transicoesCopia, len(estadosGerados), ambiguidade #retorna todos os parametros necessarios para a simulação, sendo eles: o estado inicial (que não muda), o alfabeto, o estado final (depois da minimização), o conjunto de estados (depois da minimização), as transições minimizadas, quantidade de estados e o conjunto de ambiguidades (para controle na simulação)
     
@@ -506,7 +503,7 @@ def minimizar(indice, indiceAnterior, pares, conjTransicoes, alfabeto, estadoFin
                 if estado1[0] == pares[indice][0] and estado2[0] == pares[indice][1] and estado1[1] == simbolo and estado2[1] == simbolo: #verifica se os pares de cada loop corresponde ao par que foi gerado para verificar a possibilidade de minimizar e verifica se os dois se tratam do mesmo símbolo
                     resultado.append([estado1[2], estado2[2]]) #armazena o estados resultantes de cada par e para cada símbolo, dependo do símbolo atual que corresponde ao loop do alfabeto
                     break
-    print(resultado)
+    #print(resultado)
     contagem = 0
     for r in resultado: #loop que passa pelos outros pares formados pelos estados resultantes dos pares iniciais
         for par in pares: #loop que passa pelos pares iniciais e verifica se os pares resultantes estão dentro dos pares iniciais (onde os pares iniciais são os pares a serem "marcados")
@@ -534,8 +531,7 @@ def desenhar_grafo(grafo, nome_atributo, final):
 
     pos = nx.planar_layout(grafo)
     nx.draw_networkx_nodes(grafo, pos, node_color='white', edgecolors='black', linewidths=2, node_size=1000)
-    for f in final:
-        nx.draw_networkx_nodes(grafo, pos, nodelist=f, node_color='white', edgecolors='black', linewidths=2, node_size=1500)
+    nx.draw_networkx_nodes(grafo, pos, nodelist=final, node_color='white', edgecolors='black', linewidths=2, node_size=500)
     nx.draw_networkx_labels(grafo, pos, font_size=10)
     nx.draw_networkx_edges(
         grafo, pos, edge_color="black", connectionstyle=estiloConexao, min_target_margin=20
@@ -568,15 +564,19 @@ def criarGrafo(parametrosEstados):
     plt.show()
 
 
-if not os.path.exists(diretorio()):
+if not os.path.exists(diretorio("automato")):
     parametros = entradaDados()
-    criacaoArquivo(parametros)
-automato = leituraArquivo()
-criarGrafo(automato)
-#parametrosMinimizados = conversaoAFN(parametros)
-#while True:
-#simulacao(parametros)
-#simulacao(parametrosMinimizados)
+    criacaoArquivo(parametros, "automato")
+automato = leituraArquivo("automato")
+#criarGrafo(automato)
+parametrosMinimizados = conversaoAFN(automato)
+if not os.path.exists(diretorio("automato minimizado")):
+    criacaoArquivo(parametrosMinimizados, "automato minimizado")
+automatoMin = leituraArquivo("automato minimizado")
+#criarGrafo(automatoMin)
+while True:
+    simulacao(automato)
+    simulacao(automatoMin)
 
 
 
