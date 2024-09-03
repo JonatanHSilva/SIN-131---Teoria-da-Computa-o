@@ -55,7 +55,7 @@ def entradaDados():
 def simulacao(parametrosEstados): #apenas um parametro para acessar as variáveis que retornaram, pois elas estão em formato de tuplas
     estadoAtual = parametrosEstados[0]  #a variável armazena o estado inicial conforme a posição que corresponde ao estado inicial para fazer o movimento entre estados
     estadoTemporario = []
-    estadoTeste = []
+    palavra = input('Digite a palavra:')
    
     sinal = False #variável para sinalizar se existe uma ambiguidade que é presente nos AFNs
     for i in palavra: #loop para passar por cada simbolo da palavra que será testada
@@ -241,6 +241,8 @@ def conversaoAFN(parametrosEstados):
             i += 1
             transicoesConvertidas.append([conversoesInicial, alfabeto, conversoesFinal]) #adiciona as transições que foram concatenadas em outra variável
 
+    #print(transicoesConvertidas)
+
     conjTransicoes = []
     for alfabeto in parametrosEstados[1]:
         i = 0
@@ -254,7 +256,8 @@ def conversaoAFN(parametrosEstados):
     while i < indice: #loop com a chamada da função recursiva que passará por todos estados úteis
         conjTransicoes = conversao(conjTransicoes, transicoesConvertidas, parametrosEstados[1], conjTransicoes[i][2])
         i += 1
-
+    print(conjTransicoes)
+    
     i = 0
     while i < len(conjTransicoes): #loop para remoção de funções de transição repetidas
         j = i + 1
@@ -358,7 +361,7 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
             j += 1
         i += 1
         
-    #print(pares)
+    print(pares)
 
     for par in pares: #loop para que passe por todos os pares e verifique a possibilidade de fusão ou não         
         pares = minimizar(par[3] - 1, -1, pares, conjTransicoes, parametrosEstados[1], parametrosEstados[2]) #função recursiva que verifica cada par, com o seu respectivo índice, o índice anterior ao atual(inicializado com -1), os pares, as funções de transições convertidas, o alfabeto e os estados finais de antes da conversão
