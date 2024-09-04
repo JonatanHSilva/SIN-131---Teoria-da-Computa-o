@@ -21,41 +21,40 @@ def leituraArquivo(nomeArquivo):
     return json.load(arquivo)
 
 #Entrada de dados do Automato
-def entradaDados():
-    while ValueError:
-        try:    #tratamento de exceção para entrada inválida
-            estados = int(input('Digite quantos estados possui o automato: ')) #entrada e armazenamento com a quantidade de estados do AFN ou AFD
-            for i in range (estados):   #geração dos estados conforme a entrada da quantidade
-                if i == 0:
-                    estadosGerados = "q{}".format(i)
-                else:
-                    estadosGerados += ",q{}".format(i)
-            estadosGerados = estadosGerados.split(',')  #dividindo os estados que foram gerados
-            alfabeto = str(input('Digite o alfabeto:\n')).split(', ')   #entrada e armazenamento dos simbolos que compõem o alfabeto
-            transicoes = []
-            ambiguidade = []
-            for i in estadosGerados:    #geração das funções de transição conforme o simbolo
-                for j in alfabeto:
-                    qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"? '))  #entrada de quantidade de estados resultantes para uma função de transição
-                    ocorrencia = 0
-                    for m in range(qtdTransicoes):
-                        ocorrencia += 1 #indicador de ocorrencia de estados resultantes, ou seja, indica se há um estado que há mais de um resultante 
-                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"? '.format(i, j))), ocorrencia])   #entrada de dados do estado resultante da função de transição e armazenamento das funções com o estado de ativação de função, o simbolo correspondente, o estado resultante e o indice de ocorrencia deste estado resultante para o estado de ativação definindo "caminhos" para seguir
-                    ambiguidade.append([i, j, qtdTransicoes - 1]) #armazenamento das informações dos estados, sinalizando se há ou não, mais de um resultante e o simbolo na qual ocorre
-                    #print(transicoes)
-            estadoInicial = 'q' + str(int(input(f'Dentre {estadosGerados}, qual estado seria o inicial? q'))) #entrada e armazenamento do estado inicial
-            estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')    #entrada e armazenamento do(s) estado(s) final(is)
-            print('Automato Salvo!!!')
-            return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade #retorno com as informações do automato para simulação, conversão, minimização, etc.
-        except ValueError:
-            print('Entrada inválida, digite apenas números.\n')
-   
+    def entradaDados():
+        while ValueError:
+            try:    #tratamento de exceção para entrada inválida
+                estados = int(input('Digite quantos estados possui o automato: ')) #entrada e armazenamento com a quantidade de estados do AFN ou AFD
+                for i in range (estados):   #geração dos estados conforme a entrada da quantidade
+                    if i == 0:
+                        estadosGerados = "q{}".format(i)
+                    else:
+                        estadosGerados += ",q{}".format(i)
+                estadosGerados = estadosGerados.split(',')  #dividindo os estados que foram gerados
+                alfabeto = str(input('Digite o alfabeto:\n')).split(', ')   #entrada e armazenamento dos simbolos que compõem o alfabeto
+                transicoes = []
+                ambiguidade = []
+                for i in estadosGerados:    #geração das funções de transição conforme o simbolo
+                    for j in alfabeto:
+                        qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"? '))  #entrada de quantidade de estados resultantes para uma função de transição
+                        ocorrencia = 0
+                        for m in range(qtdTransicoes):
+                            ocorrencia += 1 #indicador de ocorrencia de estados resultantes, ou seja, indica se há um estado que há mais de um resultante 
+                            transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"? '.format(i, j))), ocorrencia])   #entrada de dados do estado resultante da função de transição e armazenamento das funções com o estado de ativação de função, o simbolo correspondente, o estado resultante e o indice de ocorrencia deste estado resultante para o estado de ativação definindo "caminhos" para seguir
+                        ambiguidade.append([i, j, qtdTransicoes - 1]) #armazenamento das informações dos estados, sinalizando se há ou não, mais de um resultante e o simbolo na qual ocorre
+                        #print(transicoes)
+                estadoInicial = 'q' + str(int(input(f'Dentre {estadosGerados}, qual estado seria o inicial? q'))) #entrada e armazenamento do estado inicial
+                estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')    #entrada e armazenamento do(s) estado(s) final(is)
+                print('Automato Salvo!!!')
+                return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade #retorno com as informações do automato para simulação, conversão, minimização, etc.
+            except ValueError:
+                print('Entrada inválida, digite apenas números.\n')
+    
 
 #Simulação de aceitação de palavras
-def simulacao(parametrosEstados): #apenas um parametro para acessar as variáveis que retornaram, pois elas estão em formato de tuplas
+def simulacao(parametrosEstados, palavra): #apenas um parametro para acessar as variáveis que retornaram, pois elas estão em formato de tuplas
     estadoAtual = parametrosEstados[0]  #a variável armazena o estado inicial conforme a posição que corresponde ao estado inicial para fazer o movimento entre estados
     estadoTemporario = []
-    palavra = input('Digite a palavra:')
    
     sinal = False #variável para sinalizar se existe uma ambiguidade que é presente nos AFNs
     for i in palavra: #loop para passar por cada simbolo da palavra que será testada
@@ -256,7 +255,7 @@ def conversaoAFN(parametrosEstados):
     while i < indice: #loop com a chamada da função recursiva que passará por todos estados úteis
         conjTransicoes = conversao(conjTransicoes, transicoesConvertidas, parametrosEstados[1], conjTransicoes[i][2])
         i += 1
-    print(conjTransicoes)
+    #print(conjTransicoes)
     
     i = 0
     while i < len(conjTransicoes): #loop para remoção de funções de transição repetidas
@@ -361,7 +360,7 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
             j += 1
         i += 1
         
-    print(pares)
+    #print(pares)
 
     for par in pares: #loop para que passe por todos os pares e verifique a possibilidade de fusão ou não         
         pares = minimizar(par[3] - 1, -1, pares, conjTransicoes, parametrosEstados[1], parametrosEstados[2]) #função recursiva que verifica cada par, com o seu respectivo índice, o índice anterior ao atual(inicializado com -1), os pares, as funções de transições convertidas, o alfabeto e os estados finais de antes da conversão
@@ -578,8 +577,13 @@ if not os.path.exists(diretorio("automato minimizado")):
 automatoMin = leituraArquivo("automato minimizado")
 #criarGrafo(automatoMin)
 while True:
-    simulacao(automato)
-    simulacao(automatoMin)
-
+    palavra = input('Digite a palavra: (Dê ENTER para sair) ')
+    if palavra != '':
+        print('Testando com o automato original...')
+        simulacao(automato, palavra)
+        print('Testando com o automato minimizado...')
+        simulacao(automatoMin, palavra)
+    else: 
+        break
 
 
