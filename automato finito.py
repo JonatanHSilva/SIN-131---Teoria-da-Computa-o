@@ -21,34 +21,34 @@ def leituraArquivo(nomeArquivo):
     return json.load(arquivo)
 
 #Entrada de dados do Automato
-    def entradaDados():
-        while ValueError:
-            try:    #tratamento de exceção para entrada inválida
-                estados = int(input('Digite quantos estados possui o automato: ')) #entrada e armazenamento com a quantidade de estados do AFN ou AFD
-                for i in range (estados):   #geração dos estados conforme a entrada da quantidade
-                    if i == 0:
-                        estadosGerados = "q{}".format(i)
-                    else:
-                        estadosGerados += ",q{}".format(i)
-                estadosGerados = estadosGerados.split(',')  #dividindo os estados que foram gerados
-                alfabeto = str(input('Digite o alfabeto:\n')).split(', ')   #entrada e armazenamento dos simbolos que compõem o alfabeto
-                transicoes = []
-                ambiguidade = []
-                for i in estadosGerados:    #geração das funções de transição conforme o simbolo
-                    for j in alfabeto:
-                        qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"? '))  #entrada de quantidade de estados resultantes para uma função de transição
-                        ocorrencia = 0
-                        for m in range(qtdTransicoes):
-                            ocorrencia += 1 #indicador de ocorrencia de estados resultantes, ou seja, indica se há um estado que há mais de um resultante 
-                            transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"? '.format(i, j))), ocorrencia])   #entrada de dados do estado resultante da função de transição e armazenamento das funções com o estado de ativação de função, o simbolo correspondente, o estado resultante e o indice de ocorrencia deste estado resultante para o estado de ativação definindo "caminhos" para seguir
-                        ambiguidade.append([i, j, qtdTransicoes - 1]) #armazenamento das informações dos estados, sinalizando se há ou não, mais de um resultante e o simbolo na qual ocorre
-                        #print(transicoes)
-                estadoInicial = 'q' + str(int(input(f'Dentre {estadosGerados}, qual estado seria o inicial? q'))) #entrada e armazenamento do estado inicial
-                estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')    #entrada e armazenamento do(s) estado(s) final(is)
-                print('Automato Salvo!!!')
-                return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade #retorno com as informações do automato para simulação, conversão, minimização, etc.
-            except ValueError:
-                print('Entrada inválida, digite apenas números.\n')
+def entradaDados():
+    while ValueError:
+        try:    #tratamento de exceção para entrada inválida
+            estados = int(input('Digite quantos estados possui o automato: ')) #entrada e armazenamento com a quantidade de estados do AFN ou AFD
+            for i in range (estados):   #geração dos estados conforme a entrada da quantidade
+                if i == 0:
+                    estadosGerados = "q{}".format(i)
+                else:
+                    estadosGerados += ",q{}".format(i)
+            estadosGerados = estadosGerados.split(',')  #dividindo os estados que foram gerados
+            alfabeto = str(input('Digite o alfabeto:\n')).split(', ')   #entrada e armazenamento dos simbolos que compõem o alfabeto
+            transicoes = []
+            ambiguidade = []
+            for i in estadosGerados:    #geração das funções de transição conforme o simbolo
+                for j in alfabeto:
+                    qtdTransicoes = int(input(f'Quantas transições existem quando o estado é "{i}" e a entrada for "{j}"? '))  #entrada de quantidade de estados resultantes para uma função de transição
+                    ocorrencia = 0
+                    for m in range(qtdTransicoes):
+                        ocorrencia += 1 #indicador de ocorrencia de estados resultantes, ou seja, indica se há um estado que há mais de um resultante 
+                        transicoes.append([i, j, str(input('Para o estado "{}", qual é a sua transição quando a entrada for "{}"? '.format(i, j))), ocorrencia])   #entrada de dados do estado resultante da função de transição e armazenamento das funções com o estado de ativação de função, o simbolo correspondente, o estado resultante e o indice de ocorrencia deste estado resultante para o estado de ativação definindo "caminhos" para seguir
+                    ambiguidade.append([i, j, qtdTransicoes - 1]) #armazenamento das informações dos estados, sinalizando se há ou não, mais de um resultante e o simbolo na qual ocorre
+                    #print(transicoes)
+            estadoInicial = 'q' + str(int(input(f'Dentre {estadosGerados}, qual estado seria o inicial? q'))) #entrada e armazenamento do estado inicial
+            estadoFinal = str(input(f'Dentre os estados {estadosGerados}, qual(is) seria(m) o(s) estado(s) de aceitação? ')).split(', ')    #entrada e armazenamento do(s) estado(s) final(is)
+            print('Automato Salvo!!!')
+            return estadoInicial, alfabeto, estadoFinal, estadosGerados, transicoes, estados, ambiguidade #retorno com as informações do automato para simulação, conversão, minimização, etc.
+        except ValueError:
+            print('Entrada inválida, digite apenas números.\n')
     
 
 #Simulação de aceitação de palavras
@@ -565,25 +565,66 @@ def criarGrafo(parametrosEstados):
     fig.tight_layout()
     plt.show()
 
+valido = False
 
-if not os.path.exists(diretorio("automato")):
-    parametros = entradaDados()
-    criacaoArquivo(parametros, "automato")
-automato = leituraArquivo("automato")
-#criarGrafo(automato)
-parametrosMinimizados = conversaoAFN(automato)
-if not os.path.exists(diretorio("automato minimizado")):
-    criacaoArquivo(parametrosMinimizados, "automato minimizado")
-automatoMin = leituraArquivo("automato minimizado")
-#criarGrafo(automatoMin)
-while True:
-    palavra = input('Digite a palavra: (Dê ENTER para sair) ')
-    if palavra != '':
-        print('Testando com o automato original...')
-        simulacao(automato, palavra)
-        print('Testando com o automato minimizado...')
-        simulacao(automatoMin, palavra)
-    else: 
-        break
+while not valido:
+    selecionar = ''
+    print('Selecione o que deseja: \n')
+    print('1 - Testar palavra\n')
+    print('2 - Entrar com os dados do novo automato\n')
+    print('ENTER PARA SAIR')
+    try:
+        selecionar = int(input('Digite um numero: '))
+        if selecionar > 2 or selecionar < 1:
+            print('Tente novamente')
+        else: 
+            valido = not valido
+    except ValueError:
+        if str(selecionar) == '':
+            break
+        else:
+            print('Tente novamente')
+        
 
 
+if valido:
+    if selecionar == 1:
+        if not os.path.exists(diretorio("automato")):
+            parametros = entradaDados()
+            criacaoArquivo(parametros, "automato")
+        automato = leituraArquivo("automato")
+        #criarGrafo(automato)
+        
+        if not os.path.exists(diretorio("automato minimizado")):
+            parametrosMinimizados = conversaoAFN(automato)
+            criacaoArquivo(parametrosMinimizados, "automato minimizado")
+        automatoMin = leituraArquivo("automato minimizado")
+        #criarGrafo(automatoMin)
+
+        while True:
+            palavra = input('Digite a palavra: (Dê ENTER para sair) ')
+            if palavra != '':
+                print('Testando com o automato original...')
+                simulacao(automato, palavra)
+                print('Testando com o automato minimizado...')
+                simulacao(automatoMin, palavra)
+            else: 
+                break
+
+    elif selecionar == 2: 
+        parametros = entradaDados()
+        criacaoArquivo(parametros, "automato")
+        parametrosMinimizados = conversaoAFN(automato)
+        criacaoArquivo(parametrosMinimizados, "automato minimizado")
+
+        while True:
+            palavra = input('Digite a palavra: (Dê ENTER para sair) ')
+            if palavra != '':
+                print('Testando com o automato original...')
+                simulacao(automato, palavra)
+                print('Testando com o automato minimizado...')
+                simulacao(automatoMin, palavra)
+            else: 
+                break
+
+    
