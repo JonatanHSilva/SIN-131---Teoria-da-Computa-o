@@ -164,6 +164,7 @@ def conversao(conjTransicoes, transicoesConvertidas, alfabeto, ultimoAdicionado)
     #print(ultimoAlternativo)
 
     for transicoes in transicoesConvertidas: #loop para verificar se de todas as transições possíveis, há aquelas que não são transições vazias ou que não levam a uma transição(transições inúteis)
+        transições[0] = ordenado(transições[0])
         if ultimoAlternativo == transicoes[0]: #verifica se o último adicionado nas transições que não são inúteis leva a uma outra transição não inútil
             transicoes[2] = ordenado(transicoes[2]) #chama a função de ordenação de string para ordenar o estado resultante
             conjTransicoes.append(transicoes) #adiciona a função de transição não inútil 
