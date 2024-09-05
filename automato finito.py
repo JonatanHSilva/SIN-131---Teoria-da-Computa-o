@@ -376,7 +376,7 @@ def minimizacao(parametrosEstados, conjTransicoes, conjEstados):
                         for t in transicoesCopia: #loop para verificar o outro par
                             if t[0] == i[1] and alfabeto == t[1]: #verifica se o outro par é compatível com a transição e o simbolo correspondente ao loop de controle
                                 if estadoInicial == t[0] or estadoInicial == transicoes[0]:
-                                    estadoInicial = i[0] + ', ' + i[i]
+                                    estadoInicial = i[0] + ', ' + i[1]
                                 transicoesCopia.append([i[0] + ', ' + i[1], alfabeto, transicoes[2] + ', ' + t[2]]) #adiciona a transição com os pares fundidos
                                 transicoesCopia.remove(t) #remove a transição de um dos pares que fizeram fusão, dando lugar aos pares fundidos
                                 transicoesCopia.remove(transicoes) #remove a transição do outro par
@@ -614,8 +614,10 @@ if valido:
     elif selecionar == 2: 
         parametros = entradaDados()
         criacaoArquivo(parametros, "automato")
+        automato = leituraArquivo("automato")
         parametrosMinimizados = conversaoAFN(automato)
         criacaoArquivo(parametrosMinimizados, "automato minimizado")
+        automatoMin = leituraArquivo("automato minimizado")
 
         while True:
             palavra = input('Digite a palavra: (Dê ENTER para sair) ')
