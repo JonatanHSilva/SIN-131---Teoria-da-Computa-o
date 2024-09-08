@@ -164,15 +164,14 @@ def conversao(conjTransicoes, transicoesConvertidas, alfabeto, ultimoAdicionado)
     #print(ultimoAlternativo)
 
     for transicoes in transicoesConvertidas: #loop para verificar se de todas as transições possíveis, há aquelas que não são transições vazias ou que não levam a uma transição(transições inúteis)
-        transições[0] = ordenado(transições[0])
         if ultimoAlternativo == transicoes[0]: #verifica se o último adicionado nas transições que não são inúteis leva a uma outra transição não inútil
             transicoes[2] = ordenado(transicoes[2]) #chama a função de ordenação de string para ordenar o estado resultante
-            conjTransicoes.append(transicoes) #adiciona a função de transição não inútil 
+            conjTransicoes.append(transicoes) #adiciona a função de transição não inútil
             jaAdicionou = False #variável para controle de transições que já foram (ou não) adicionadas para caso haja transição que leva para o próprio estado
             for transicoes1 in conjTransicoes: #loop para verificar se já foi adicionado transições que levam para o próprio estado
                 if transicoes1[0] == transicoes[2]:
                     jaAdicionou = True 
-            if not jaAdicionou: 
+            if not jaAdicionou:  
                 if ultimoAlternativo != transicoes[2]:
                     conversao(conjTransicoes, transicoesConvertidas, alfabeto, transicoes[2]) #chamada recursiva com o último estado resultante adicionado para verificar se há outro estado que não seja inútil
     #print(conjTransicoes)
@@ -248,6 +247,7 @@ def conversaoAFN(parametrosEstados):
         i = 0
         while i < len(transicoesConvertidas):
             if parametrosEstados[0] == transicoesConvertidas[i][0] and alfabeto == transicoesConvertidas[i][1]:
+                transicoesConvertidas[i][2] = ordenado(transicoesConvertidas[i][2])
                 conjTransicoes.append(transicoesConvertidas[i]) #adiciona o primeiro estado de ativação da função de transição para quaisquer símbolos que exista no alfabeto, este que servirá de guia para eliminar os estados inúteis
             i += 1
     
@@ -523,7 +523,9 @@ def minimizar(indice, indiceAnterior, pares, conjTransicoes, alfabeto, estadoFin
         else:
             for par in pares: #loop para conferir se o par que não é igual, está no conjunto de pares, se sim, marca o par com a alteração da variável controle "achou", na qual, achou sendo True seria o par que não pode fundir
                 if (r[0] == par[0] and r[1] == par[1]) or (r[0] == par[1] and r[1] == par[0]):
-                    achou = True
+                    if contagem > 0:
+                       achou = True
+                        
     
     if not achou and contagem < len(resultado): #se a variável de controle deu falso é porque possui um par "marcado" seja porque foi marcado por se trata de pares que levam um ao outro ou por não estar na lista de pares para serem marcados, ou seja, um par já marcado e se os pares resultantes não forem todos estados iguais
         pares[indice][2] = True #"marca o par"
